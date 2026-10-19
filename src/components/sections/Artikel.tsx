@@ -6,14 +6,16 @@ import { useEffect, useRef, useState } from "react";
 
 import { Jam, PanahKanan, PanahKiri } from "@/components/ikon";
 import { Tombol } from "@/components/ui/Tombol";
-import { artikelBeranda, type ArtikelBeranda } from "@/data/artikel";
+import type { ArtikelBeranda } from "@/data/artikel";
 
 /**
  * Section Artikel di beranda: kolom kiri berisi judul + deskripsi + tombol
  * "Lihat Semua Artikel", kolom kanan carousel kartu artikel (2 per tampilan
  * di sm+, 1 di mobile) dengan tombol navigasi di tepi thumbnail 16:9.
+ *
+ * Daftar artikel diambil server dari CMS dan dikirim sebagai prop.
  */
-export function Artikel() {
+export function Artikel({ artikel }: { artikel: ArtikelBeranda[] }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [bisaKiri, setBisaKiri] = useState(false);
   const [bisaKanan, setBisaKanan] = useState(false);
@@ -35,7 +37,7 @@ export function Artikel() {
       el.removeEventListener("scroll", perbarui);
       window.removeEventListener("resize", perbarui);
     };
-  }, [artikelBeranda.length]);
+  }, [artikel.length]);
 
   const geser = (arah: number) => {
     const el = viewportRef.current;
@@ -97,7 +99,7 @@ export function Artikel() {
             className="overflow-x-auto overflow-y-hidden pt-2.5 pb-3 [scroll-snap-type:x_mandatory] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             <div className="flex items-stretch gap-6">
-              {artikelBeranda.map((artikel) => (
+              {artikel.map((artikel) => (
                 <div
                   key={artikel.slug}
                   data-slide

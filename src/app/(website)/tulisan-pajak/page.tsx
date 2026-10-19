@@ -5,8 +5,7 @@ import { PengantarArtikel } from "@/components/sections/PengantarArtikel";
 import { DaftarArtikel, ambilKategori } from "@/components/sections/DaftarArtikel";
 import { Obrolan } from "@/components/ikon";
 import { Tombol } from "@/components/ui/Tombol";
-import { artikelBeranda } from "@/data/artikel";
-import { situs } from "@/data/situs";
+import { ambilArtikel, ambilSitus } from "@/cms/konten";
 
 export const metadata: Metadata = {
   title: "Artikel & Edukasi Perpajakan | EasyTax",
@@ -41,6 +40,10 @@ function FallbackArtikel() {
 
 async function IsiTulisanPajak({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
+  const [artikelBeranda, situs] = await Promise.all([
+    ambilArtikel(),
+    ambilSitus(),
+  ]);
 
   /* Halaman: guard against nilai ngawur di URL. */
   const mentah = Number.parseInt(params.page ?? "1", 10);

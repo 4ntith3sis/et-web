@@ -5,29 +5,29 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { Cari, PanahKanan, TutupLingkar } from "@/components/ikon";
-import { layananBeranda } from "@/data/layanan";
+import type { LayananBeranda } from "@/data/layanan";
 
 /**
  * "Daftar Layanan yang Tersedia" — diport dari `ServiceGrid` easytax-demo:
  * judul rata kiri dengan badge, lalu grid tiga kolom kartu layanan.
  *
  * Berbeda dari carousel di beranda, di sini semua layanan tampil penuh dan
- * bisa dicari. Pencarian berjalan di sisi klien (data layanan kecil dan
- * statis), jadi tidak perlu request ke server.
+ * bisa dicari. Pencarian berjalan di sisi klien (data layanan kecil),
+ * sehingga daftar dikirim sebagai prop dari server.
  */
-export function DaftarLayanan() {
+export function DaftarLayanan({ layanan }: { layanan: LayananBeranda[] }) {
   const [kunci, setKunci] = useState("");
 
   const hasil = useMemo(() => {
     const q = kunci.trim().toLowerCase();
-    if (!q) return layananBeranda;
-    return layananBeranda.filter(
+    if (!q) return layanan;
+    return layanan.filter(
       (l) =>
         l.judul.toLowerCase().includes(q) ||
         l.subjudul.toLowerCase().includes(q) ||
         l.ringkasan.toLowerCase().includes(q),
     );
-  }, [kunci]);
+  }, [kunci, layanan]);
 
   return (
     <section
@@ -89,7 +89,7 @@ export function DaftarLayanan() {
             <p aria-live="polite" className="mt-2.5 text-[0.82rem] text-teks-redup">
               {kunci.trim().length > 0
                 ? `${hasil.length} layanan cocok dengan "${kunci.trim()}"`
-                : `${layananBeranda.length} layanan tersedia`}
+                : `${layanan.length} layanan tersedia`}
             </p>
           </form>
         </div>

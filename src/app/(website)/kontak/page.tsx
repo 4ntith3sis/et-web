@@ -4,6 +4,7 @@ import { FaqKontak } from "@/components/sections/FaqKontak";
 import { FormPertanyaan } from "@/components/sections/FormPertanyaan";
 import { KontakHero } from "@/components/sections/KontakHero";
 import { LokasiKantor } from "@/components/sections/LokasiKantor";
+import { ambilJamOperasional, ambilTopikKonsultasi } from "@/cms/konten";
 
 export const metadata: Metadata = {
   title: "Hubungi Kami | EasyTax",
@@ -24,11 +25,19 @@ export const metadata: Metadata = {
  * hero + 3 kartu kontak, form pertanyaan dengan side info, lokasi kantor
  * (hanya satu kantor pusat), dan FAQ. Visual memakai design system v2.
  */
-export default function KontakPage() {
+export default async function KontakPage() {
+  const [topikKonsultasi, jamOperasional] = await Promise.all([
+    ambilTopikKonsultasi(),
+    ambilJamOperasional(),
+  ]);
+
   return (
     <>
       <KontakHero />
-      <FormPertanyaan />
+      <FormPertanyaan
+        topikKonsultasi={topikKonsultasi}
+        jamOperasional={jamOperasional}
+      />
       <LokasiKantor />
       <FaqKontak />
     </>

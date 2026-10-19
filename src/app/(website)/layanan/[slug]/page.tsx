@@ -11,12 +11,12 @@ import { LayananDetailHero } from "@/components/sections/LayananDetailHero";
 import { MediaNasional } from "@/components/sections/MediaNasional";
 import { Mitra } from "@/components/sections/Mitra";
 import { Testimoni } from "@/components/sections/Testimoni";
+import { ambilDetailLayanan, ambilLayanan } from "@/cms/konten";
 import { layananBeranda } from "@/data/layanan";
-import { cariDetailLayanan } from "@/data/layanan-detail";
 
 type Params = Promise<{ slug: string }>;
 
-/** Prerender semua slug layanan yang ada di data. */
+/** Prerender semua slug layanan yang ada di data statis. */
 export function generateStaticParams() {
   return layananBeranda.map((l) => ({ slug: l.slug }));
 }
@@ -27,12 +27,20 @@ export async function generateMetadata({
   params: Params;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const layanan = layananBeranda.find((l) => l.slug === slug);
+  const layanan = (await ambilLayanan()).find((l) => l.slug === slug);
   if (!layanan) return { title: "Layanan Tidak Ditemukan | EasyTax" };
 
   return {
     title: `${layanan.judul} | EasyTax`,
     description: layanan.ringkasan,
+    openGraph: {
+      title: layanan.judul,
+      description: layanan.ringkasan,
+      images: [layanan.gambar],
+      type: "website",
+      locale: "id_ID",
+      siteName: "EasyTax",
+    },
   };
 }
 
@@ -51,14 +59,17 @@ export default function HalamanLayanan({ params }: { params: Params }) {
 
 async function IsiLayanan({ params }: { params: Params }) {
   const { slug } = await params;
-  const layanan = layananBeranda.find((l) => l.slug === slug);
-  if (!layanan) notFound();
+  const [layanan, detail] = await Promise.all([
+    ambilLayanan(),
+    ambilDetailLayanan(slug),
+  ]);
 
-  const detail = cariDetailLayanan(slug);
+  const ini = layanan.find((l) => l.slug === slug);
+  if (!ini) notFound();
 
   return (
     <>
-      <LayananDetailHero layanan={layanan} />
+      <LayananDetailHero layanan={ini} />
       <Keunggulan />
       <HargaLayanan paket={detail?.paket ?? []} />
       <CaraKerja />

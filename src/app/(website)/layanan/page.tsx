@@ -7,6 +7,7 @@ import { LayananHero } from "@/components/sections/LayananHero";
 import { MediaNasional } from "@/components/sections/MediaNasional";
 import { Mitra } from "@/components/sections/Mitra";
 import { Testimoni } from "@/components/sections/Testimoni";
+import { ambilLayanan } from "@/cms/konten";
 
 export const metadata: Metadata = {
   title: "Layanan Perpajakan & Akuntansi | EasyTax",
@@ -18,12 +19,14 @@ export const metadata: Metadata = {
  * Halaman /layanan. Susunannya: hero, advantages (reuse), katalog layanan,
  * cara kerja, lalu blok kepercayaan yang sama dengan beranda.
  */
-export default function LayananPage() {
+export default async function LayananPage() {
+  const layanan = await ambilLayanan();
+
   return (
     <>
       <LayananHero />
       <Keunggulan />
-      <DaftarLayanan />
+      <DaftarLayanan layanan={layanan} />
       <CaraKerja />
       <Mitra />
       <MediaNasional />

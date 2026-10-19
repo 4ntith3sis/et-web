@@ -3,24 +3,39 @@
 import { useState } from "react";
 
 import { Centang, Jam, Lokasi, PanahKanan } from "@/components/ikon";
-import { jamOperasional, topikKonsultasi } from "@/data/kontak";
 
-type Status = "idle" | "mengirim" | "sukses";
+type Status = "idle" | "mengirim" | "sukses" | "gagal";
 
 /* Struktur form & side-info diadaptasi dari easytax-demo (v1):
    field yang sama (nama, bisnis, email, WA, topik, pesan) tetapi dengan
-   gaya visual v2 — input isi (filled), kartu putih membulat, chip ikon. */
-export function FormPertanyaan() {
+   gaya visual v2 — input isi (filled), kartu putih membulat, chip ikon.
+
+   Topik konsultasi dan jam operasional dikirim server dari global CMS. */
+export function FormPertanyaan({
+  topikKonsultasi,
+  jamOperasional,
+}: {
+  topikKonsultasi: string[];
+  jamOperasional: { hari: string; jam: string }[];
+}) {
   const [status, setStatus] = useState<Status>("idle");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
     setStatus("mengirim");
-    await new Promise((r) => setTimeout(r, 1200));
-    form.reset();
-    setStatus("sukses");
-    setTimeout(() => setStatus("idle"), 5000);
+    try {
+      const res = await fetch("/api/kontak", {
+        method: "POST",
+        body: new FormData(form),
+      });
+      if (!res.ok) throw new Error("gagal");
+      form.reset();
+      setStatus("sukses");
+      setTimeout(() => setStatus("idle"), 5000);
+    } catch {
+      setStatus("gagal");
+    }
   };
 
   return (
@@ -53,6 +68,16 @@ export function FormPertanyaan() {
               >
                 <Centang className="h-5 w-5 shrink-0" />
                 Terima kasih! Tim kami akan menghubungi Anda dalam 1×24 jam.
+              </div>
+            )}
+
+            {status === "gagal" && (
+              <div
+                role="alert"
+                className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.9rem] font-semibold text-red-700"
+              >
+                Maaf, pesan gagal terkirim. Silakan coba lagi atau hubungi kami
+                via WhatsApp.
               </div>
             )}
 
@@ -90,7 +115,7 @@ export function FormPertanyaan() {
                   Topik Konsultasi*
                 </span>
                 <select
-                  name="topic"
+                  name="topik"
                   required
                   defaultValue=""
                   className="w-full rounded-lg border border-garis bg-netral-lat px-4 py-3 text-[0.95rem] text-teks-utama transition-[var(--transition-base)] focus:border-navy-900 focus:bg-white"
@@ -111,7 +136,7 @@ export function FormPertanyaan() {
                   Pesan / Pertanyaan*
                 </span>
                 <textarea
-                  name="message"
+                  name="pesan"
                   rows={4}
                   required
                   placeholder="Ceritakan kebutuhan perpajakan bisnis Anda — kami akan bantu rekomendasikan solusi yang sesuai."

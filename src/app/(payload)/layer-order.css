@@ -1,0 +1,46 @@
+/*
+ * Urutan `@layer` lintas stylesheet ditentukan oleh kemunculan PERTAMA di
+ * dokumen, bukan urutan import. CSS Payload berasal dari chunk miliknya dan
+ * selalu terbit lebih dulu, sehingga `payload-default` terdaftar sebelum
+ * `base` Tailwind. Akibatnya preflight (`h1 { font-size: inherit }`,
+ * `* { border: 0 solid }`, `button { background: transparent }`) menimpa
+ * gaya admin Payload: judul jadi 13px, input kehilangan garis, tombol
+ * kehilangan latar.
+ *
+ * File ini diimport paling atas layout admin sehingga `base` ikut
+ * terdaftar lebih dulu dan `payload-default` (terbit setelahnya) menang atas
+ * preflight. `utilities` TIDAK disebut di sini agar tetap terdaftar
+ * belakangan — utility class Tailwind tetap menang untuk kanvas Puck yang
+ * menyalin stylesheet dokumen induk.
+ */
+@layer properties, theme, base, components;
+
+/*
+ * Kanvas Puck menyalin stylesheet + atribut <html> dokumen admin ke iframe
+ * pratinjaunnya, sehingga reset admin Payload ikut terbawa:
+ * `html { font-size: 13px; line-height: 20px }` membuat seluruh utility
+ * Tailwind berbasis rem (margin, padding, teks) menyusut 13/16 ≈ 81%
+ * dibanding halaman publik, dan teks mewarisi warna netral admin, bukan
+ * navy situs. Aturan di bawah dipilih lewat penanda milik Puck
+ * (`#frame-root` hanya ada di dalam iframe pratinjau, tidak pernah di
+ * dokumen admin) sehingga kanvas kembali setara halaman publik tanpa
+ * mengubah kepadatan font admin. Sengaja di luar @layer agar menang atas
+ * `payload-default`.
+ */
+html:has(#frame-root) {
+  font-size: 16px;
+  line-height: 1.5;
+  scroll-behavior: smooth;
+  /* `--font-body` juga didefinisikan Payload di lapisan `payload-default`
+     (setelah `theme`), sehingga tanpa penetapan ulang ini teks kanvas ikut
+     memakai font sistem admin, bukan Plus Jakarta Sans situs. */
+  --font-body: "Plus Jakarta Sans", "Plus Jakarta Sans Fallback";
+}
+
+html:has(#frame-root) body {
+  background-color: var(--color-netral-putih);
+  color: var(--color-teks-utama);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

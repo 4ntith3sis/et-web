@@ -55,7 +55,13 @@
   --color-teks-redup: #637083;
   --color-teks-terang: #cbd5e1;
 
-  /* --- Tipografi --- */
+  /* --- Tipografi ---
+     Nilai var next/font (kelas `*_variable` di layout publik) diduplikasi ke
+     sini agar kanvas Puck di dokumen admin ikut mengenal nama keluarga yang
+     sama; `@font-face`-nya sudah ikut terbundel di CSS ini. Nilai identik
+     dengan next/font, jadi halaman publik tidak berubah. */
+  --font-outfit: "Outfit", "Outfit Fallback";
+  --font-jakarta: "Plus Jakarta Sans", "Plus Jakarta Sans Fallback";
   --font-heading: var(--font-outfit), "Outfit", sans-serif;
   --font-body: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
 
@@ -95,12 +101,17 @@
 }
 
 @layer base {
-  html {
-    scroll-behavior: smooth;
+  /* Scope ke dokumen `<html lang="id">` (situs publik). Admin Payload
+     memakai latar bertema (`--theme-bg`, gelap bila tema dark) dan TIDAK
+     pernah mengatur `body { background-color }`, sehingga aturan putih di
+     sini akan menutupi latar gelap admin sementara teksnya terang →
+     tulisan tak terlihat. Kanvas Puck mendapat set body-nya sendiri di
+     (payload)/layer-order.css (html:has(#frame-root)). */
+  html[lang="id"] {
     -webkit-text-size-adjust: 100%;
   }
 
-  body {
+  html[lang="id"] body {
     background-color: var(--color-netral-putih);
     color: var(--color-teks-utama);
     font-family: var(--font-body);
@@ -108,19 +119,26 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Fokus keyboard hanya tampil saat navigasi via keyboard, supaya tidak
-     ada outline biru default yang merusak desain di klik mouse. */
-  ::selection {
+  /* Seleksi teks memakai kuning brand (hanya di situs publik). */
+  html[lang="id"] ::selection {
     background-color: var(--color-yellow-500);
     color: var(--color-navy-900);
   }
 }
 
+/* Smooth scrolling hanya untuk dokumen `<html lang="id">` (situs publik);
+   admin Payload memakai perilaku gulir bawaannya. */
+html[lang="id"] {
+  scroll-behavior: smooth;
+}
+
 /* Indikator fokus keyboard: cincin ganda navy (outline, 14.34:1 di putih)
    + kuning (box-shadow, 9.03:1 di navy) supaya lulus 3:1 di latar terang
    DAN gelap. Sengaja di luar @layer supaya menang atas utilitas
-   shadow/focus milik komponen saat fokus keyboard. */
-:focus-visible {
+   shadow/focus milik komponen saat fokus keyboard. Dibatasi ke dokumen
+   `<html lang="id">` (situs publik) agar admin Payload memakai fokus bawaannya. */
+html[lang="id"] :focus-visible,
+html[lang="id"]:focus-visible {
   outline: 2px solid var(--color-navy-900);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px var(--color-yellow-500);

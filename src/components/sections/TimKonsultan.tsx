@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import { Perisai } from "@/components/ikon";
-import { timKonsultan } from "@/data/tim";
+import { ambilTim } from "@/cms/konten";
 
 /**
  * Section "Tim Konsultan" untuk halaman /tentang-kami.
@@ -10,7 +10,9 @@ import { timKonsultan } from "@/data/tim";
  * foto, nama, jabatan, tingkat lisensi, dan bio singkat. Grid 4 kolom
  * di desktop supaya nama dan sertifikasi mudah dibandingkan.
  */
-export function TimKonsultan() {
+export async function TimKonsultan() {
+  const timKonsultan = await ambilTim();
+
   return (
     <section
       id="tim"

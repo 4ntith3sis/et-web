@@ -1,28 +1,35 @@
 import Link from "next/link";
 
 import { Email, Instagram, Jam, Lokasi, TikTok, WhatsApp } from "@/components/ikon";
-import { jamOperasional } from "@/data/kontak";
-import { menuNavigasi, situs } from "@/data/situs";
+import { ambilJamOperasional, ambilNavigasi, ambilSitus } from "@/cms/konten";
 
 /* Tahun ditulis statis: `new Date()` tidak stabil saat prerender. */
 const TAHUN = 2026;
-
-const SOSMED = [
-  {
-    label: "Instagram",
-    href: "https://www.instagram.com/easytax.id/",
-    Ikon: Instagram,
-  },
-  { label: "TikTok", href: "https://www.tiktok.com/@easytax.id", Ikon: TikTok },
-  { label: "WhatsApp", href: situs.whatsappUrl, Ikon: WhatsApp },
-];
 
 /**
  * Footer situs: identitas + deskripsi + sosmed, lalu kolom Perusahaan, Jam
  * Kantor (dari data kontak), dan Hubungi Kami, serta baris hak cipta.
  * Warna navy diseragamkan lewat globals.css.
+ *
+ * Sumber data: global `pengaturan-situs` (dengan fallback statis).
  */
-export function Footer() {
+export async function Footer() {
+  const [situs, menuNavigasi, jamOperasional] = await Promise.all([
+    ambilSitus(),
+    ambilNavigasi(),
+    ambilJamOperasional(),
+  ]);
+
+  const SOSMED = [
+    {
+      label: "Instagram",
+      href: "https://www.instagram.com/easytax.id/",
+      Ikon: Instagram,
+    },
+    { label: "TikTok", href: "https://www.tiktok.com/@easytax.id", Ikon: TikTok },
+    { label: "WhatsApp", href: situs.whatsappUrl, Ikon: WhatsApp },
+  ];
+
   return (
     <footer className="border-t border-white/8 bg-navy-900 text-teks-terang">
       <div className="mx-auto w-full max-w-maks px-6 pt-[clamp(44px,6vw,80px)] pb-8 md:px-8">

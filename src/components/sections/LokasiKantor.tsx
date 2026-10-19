@@ -1,7 +1,8 @@
 import Image from "next/image";
 
 import { Jam, Lokasi, Telepon } from "@/components/ikon";
-import { kantor, jamOperasional } from "@/data/kontak";
+import { ambilJamOperasional } from "@/cms/konten";
+import { kantor } from "@/data/kontak";
 
 /**
  * Section "Kantor Kami" untuk halaman /kontak.
@@ -10,8 +11,9 @@ import { kantor, jamOperasional } from "@/data/kontak";
  * sengaja-designed sebagai satu panel besar: foto gedung di kiri, detail
  * alamat dan jam operasional di kanan, tanpa grid kantor yang kosong.
  */
-export function LokasiKantor() {
+export async function LokasiKantor() {
   const [kantorPusat] = kantor;
+  const jamOperasional = await ambilJamOperasional();
 
   return (
     <section

@@ -2,22 +2,30 @@ import Image from "next/image";
 
 import { Centang, Medali, PanahKanan, Perisai } from "@/components/ikon";
 import { Tombol } from "@/components/ui/Tombol";
-import { situs } from "@/data/situs";
+import { DEFAULT_HERO } from "@/puck/default-props";
+import type { PropsHero } from "@/puck/types";
 
 const FOTO_HERO =
   "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1600&q=80";
 
-const BUKTI =
-  "Membantu ribuan UMKM dan perusahaan menyusun laporan keuangan, e-filing SPT Tahunan/Masa, pengukuhan PKP, hingga pendampingan audit pajak 100% online & resmi.";
-
 /**
- * Hero v1 EasyTax dipulihkan: latar navy penuh, dua kolom (55/45).
- * Kolom kiri berisi tag pill, judul, deskripsi, dua CTA, dan baris bukti;
- * kolom kanan foto dengan gradien kiri serta badge sertifikat mengambang.
- *
- * Section kedua (Keunggulan) tidak lagi meniru isi hero ini.
+ * Hero v1 EasyTax: latar navy penuh, dua kolom (55/45). Kolom kiri berisi
+ * tag pill, judul, deskripsi, dua CTA, dan baris bukti; kolom kanan foto
+ * dengan gradien kiri serta badge sertifikat mengambang.
  */
-export function Hero() {
+export function Hero(props: Partial<PropsHero> = {}) {
+  const {
+    lencana,
+    judul,
+    sorotan,
+    deskripsi,
+    poin,
+    ctaLabel,
+    ctaHref,
+    cta2Label,
+    cta2Href,
+  } = { ...DEFAULT_HERO, ...props };
+
   return (
     <section
       id="hero"
@@ -29,53 +37,49 @@ export function Hero() {
         <div className="z-3 flex flex-col justify-center px-6 pt-[clamp(52px,6vw,92px)] pb-[clamp(48px,5vw,72px)] md:px-8 lg:pr-9 lg:pl-[max(24px,calc((100vw_-_var(--container-maks))/2_+_24px))]">
           <p className="inline-flex w-max max-w-full items-center gap-2.5 rounded-full border border-white/16 bg-white/6 px-4 py-2.5 text-[0.78rem] font-extrabold tracking-[0.13em] text-yellow-500 uppercase">
             <span className="h-[7px] w-[7px] shrink-0 rounded-full bg-yellow-500" />
-            Konsultan Pajak &amp; Akuntansi
+            {lencana}
           </p>
 
           <h1
             id="hero-judul"
             className="mt-5.5 mb-6 max-w-[640px] font-heading text-[clamp(2.6rem,4vw,3.4rem)] leading-[1.08] font-black tracking-[-0.03em] text-white uppercase 2xl:max-w-[700px] 2xl:text-[3.8rem]"
           >
-            Terpercaya,{" "}
-            <span className="text-yellow-500">akurat &amp; bebas denda.</span>
+            {judul}{" "}
+            <span className="text-yellow-500">{sorotan}</span>
           </h1>
 
           <p className="mb-8 max-w-[520px] text-[1.08rem] leading-[1.7] text-teks-terang">
-            {BUKTI}
+            {deskripsi}
           </p>
 
           <div className="mb-[30px] flex flex-wrap gap-4">
             <Tombol
-              href={situs.whatsappUrl}
+              href={ctaHref}
               external
               ukuran="sedang"
               ikonKanan={<PanahKanan className="h-4 w-4" />}
               className="h-[54px] rounded-full px-9 text-[1rem]"
             >
-              Konsultasi Gratis
+              {ctaLabel}
             </Tombol>
             <Tombol
-              href="/layanan"
+              href={cta2Href}
               varian="garisPutih"
               ukuran="sedang"
               className="h-[54px] rounded-full px-8 text-[1rem]"
             >
-              Lihat Layanan Kami
+              {cta2Label}
             </Tombol>
           </div>
 
           <ul className="flex flex-wrap items-center gap-x-7 gap-y-3.5">
-            {[
-              "Pendampingan Audit & SP2DK",
-              "Konsultan Berizin Resmi",
-              "Garansi Kerahasiaan 100%",
-            ].map((item) => (
+            {poin.map((item) => (
               <li
-                key={item}
+                key={item.teks}
                 className="flex items-center gap-2 text-[0.92rem] font-bold text-white"
               >
                 <Centang className="h-4.5 w-4.5 shrink-0 text-emerald-accent" />
-                {item}
+                {item.teks}
               </li>
             ))}
           </ul>

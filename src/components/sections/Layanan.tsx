@@ -5,13 +5,16 @@ import Link from "next/link";
 import { useRef } from "react";
 
 import { PanahKanan, PanahKiri } from "@/components/ikon";
-import { layananBeranda } from "@/data/layanan";
+import type { LayananBeranda } from "@/data/layanan";
 
 /**
  * Section "Layanan Pajak & Keuangan" di beranda, diport dari easytax-demo:
  * judul terpusat + carousel kartu layanan yang bisa digeser horizontal.
+ *
+ * Data layanan diambil oleh server (halaman) dari CMS lalu dikirim sebagai
+ * prop agar komponen ini tetap dapat berjalan di klien.
  */
-export function Layanan() {
+export function Layanan({ layanan }: { layanan: LayananBeranda[] }) {
   const trackRef = useRef<HTMLDivElement>(null);
 
   const geser = (arah: number) => {
@@ -80,7 +83,7 @@ export function Layanan() {
             ref={trackRef}
             className="flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            {layananBeranda.map((layanan) => (
+            {layanan.map((layanan) => (
               <article
                 key={layanan.slug}
                 className="group flex min-w-0 flex-[0_0_calc((100%-72px)/4)] flex-col overflow-hidden rounded-xl border border-garis bg-white shadow-sm transition-[var(--transition-base)] hover:shadow-xl max-lg:flex-[0_0_calc((100%-48px)/3)] max-sm:flex-[0_0_86%]"

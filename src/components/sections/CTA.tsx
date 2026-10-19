@@ -1,14 +1,20 @@
 import { Email, Obrolan } from "@/components/ikon";
 import { Tombol } from "@/components/ui/Tombol";
 import { situs } from "@/data/situs";
+import { DEFAULT_CTA } from "@/puck/default-props";
+import type { PropsCta } from "@/puck/types";
 
 /**
- * Banner CTA penutup di atas footer: panel navy membulat (rounded-xl)
- * di atas section putih — bentuknya disamakan dengan CTA penutup
- * halaman /tulisan-pajak. Berisi badge, judul, deskripsi, dan sepasang
- * tombol aksi.
+ * Banner CTA penutup di atas footer: panel navy membulat (rounded-xl) di
+ * atas section putih — bentuknya disamakan dengan CTA penutup halaman
+ * /tulisan-pajak. Berisi badge, judul, deskripsi, dan sepasang tombol aksi.
  */
-export function CTA() {
+export function CTA(props: Partial<PropsCta> = {}) {
+  const { lencana, judul, deskripsi, ctaLabel, ctaHref, emailLabel } = {
+    ...DEFAULT_CTA,
+    ...props,
+  };
+
   return (
     <section id="kontak" className="bg-white py-[clamp(48px,6.4vw,72px)]">
       <div className="mx-auto w-full max-w-maks px-6 md:px-8">
@@ -21,28 +27,26 @@ export function CTA() {
 
           <span className="relative inline-flex items-center gap-2 rounded-full border border-yellow-500/45 bg-yellow-500/15 px-5 py-2 text-[0.85rem] font-bold tracking-[0.04em] text-yellow-500 uppercase">
             <Obrolan className="h-3.5 w-3.5" />
-            Siap Membantu Anda
+            {lencana}
           </span>
 
           <h2 className="relative mx-auto mt-6 max-w-[760px] font-heading text-[clamp(1.8rem,3vw,2.4rem)] leading-[1.25] font-extrabold tracking-[-0.03em] text-white text-balance">
-            Anda dapat fokus menjalankan bisnis, serahkan urusan perpajakan ke
-            EasyTax
+            {judul}
           </h2>
 
           <p className="relative mx-auto mt-4 max-w-[680px] text-[1.05rem] leading-[1.7] text-white/75">
-            Hubungi konsultan kami sekarang untuk mendapatkan konsultasi gratis
-            dan solusi perpajakan terbaik bagi perusahaan Anda.
+            {deskripsi}
           </p>
 
           <div className="relative mt-9 flex flex-wrap items-center justify-center gap-4.5">
             <Tombol
-              href={situs.whatsappUrl}
+              href={ctaHref}
               external
               ukuran="sedang"
               ikonKiri={<Obrolan className="h-4 w-4" />}
               className="h-[54px] rounded-full px-8 text-[0.98rem]"
             >
-              Chat WhatsApp Sekarang
+              {ctaLabel}
             </Tombol>
 
             <Tombol
@@ -52,7 +56,7 @@ export function CTA() {
               ikonKiri={<Email className="h-4 w-4" />}
               className="h-[54px] rounded-full px-8 text-[0.98rem]"
             >
-              Email: {situs.kontak.email}
+              {emailLabel}
             </Tombol>
           </div>
         </div>

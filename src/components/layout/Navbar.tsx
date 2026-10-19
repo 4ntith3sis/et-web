@@ -8,7 +8,8 @@ import { useEffect, useState } from "react";
 import { Menu, Tutup, Obrolan } from "@/components/ikon";
 import { Tombol } from "@/components/ui/Tombol";
 import { cn } from "@/lib/cn";
-import { logoMark, menuNavigasi, situs } from "@/data/situs";
+import { logoMark } from "@/data/situs";
+import type { ItemNavigasi } from "@/types";
 
 /**
  * Navigasi utama: sticky, semi-transparan + blur, dengan drawer untuk mobile.
@@ -25,7 +26,17 @@ import { logoMark, menuNavigasi, situs } from "@/data/situs";
  *    tidak ikut ter-scroll.
  *  - Logo memakai next/image, bukan <img> mentah.
  */
-export function Navbar() {
+export function Navbar({
+  nama,
+  subjudul,
+  whatsappUrl,
+  menu,
+}: {
+  nama: string;
+  subjudul: string;
+  whatsappUrl: string;
+  menu: ItemNavigasi[];
+}) {
   const pathname = usePathname();
   const [terbuka, setTerbuka] = useState(false);
 
@@ -62,12 +73,12 @@ export function Navbar() {
             dengan wordmark dan subjudul bertumpuk di sebelahnya. */}
         <Link
           href="/"
-          aria-label={`${situs.nama} — beranda`}
+          aria-label={`${nama} — beranda`}
           className="flex items-center gap-3 no-underline"
         >
           <Image
             src={logoMark}
-            alt={`Logo ${situs.nama}`}
+            alt={`Logo ${nama}`}
             width={48}
             height={48}
             priority
@@ -75,19 +86,19 @@ export function Navbar() {
           />
           <span className="flex flex-col justify-center leading-tight">
             <span className="font-heading text-[1.75rem] font-extrabold tracking-[-0.02em] text-navy-900">
-              {situs.nama}
+              {nama}
             </span>
             {/* Subjudul disembunyikan di layar sempit — kalau tidak ia membungkus
                 baris dan mendorong tinggi header. */}
             <span className="hidden text-[0.74rem] font-bold tracking-[0.02em] text-navy-900 sm:block">
-              {situs.subjudul}
+              {subjudul}
             </span>
           </span>
         </Link>
 
         {/* Menu desktop */}
         <ul className="hidden items-center gap-8 lg:flex">
-          {menuNavigasi.map((item) => {
+          {menu.map((item) => {
             const aktif =
               item.href === "/"
                 ? pathname === "/"
@@ -115,7 +126,7 @@ export function Navbar() {
         {/* Aksi kanan */}
         <div className="flex items-center gap-4">
           <Tombol
-            href={situs.whatsappUrl}
+            href={whatsappUrl}
             external
             ukuran="kecil"
             ikonKiri={<Obrolan className="h-4 w-4" />}
@@ -144,7 +155,7 @@ export function Navbar() {
         className="border-t border-garis bg-white lg:hidden"
       >
         <ul className="flex flex-col px-6 py-2">
-          {menuNavigasi.map((item) => {
+          {menu.map((item) => {
             const aktif =
               item.href === "/"
                 ? pathname === "/"
@@ -169,7 +180,7 @@ export function Navbar() {
 
         <div className="px-6 pt-2 pb-6">
           <Tombol
-            href={situs.whatsappUrl}
+            href={whatsappUrl}
             external
             ukuran="besar"
             ikonKiri={<Obrolan className="h-5 w-5" />}

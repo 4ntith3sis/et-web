@@ -6,13 +6,13 @@ import { ArtikelDetailHero } from "@/components/sections/ArtikelDetailHero";
 import { ArtikelTerkait } from "@/components/sections/ArtikelTerkait";
 import { BadanArtikel } from "@/components/sections/BadanArtikel";
 import { CTA } from "@/components/sections/CTA";
+import { ambilArtikel, ambilArtikelDetail } from "@/cms/konten";
 import { artikelBeranda } from "@/data/artikel";
-import { cariArtikelDetail } from "@/data/artikel-detail";
 import { ekstrakHeading, type BlokIsi } from "@/lib/artikel/toc";
 
 type Params = Promise<{ slug: string }>;
 
-/** Prerender semua slug artikel yang ada di data. */
+/** Prerender semua slug artikel yang ada di data statis. */
 export function generateStaticParams() {
   return artikelBeranda.map((a) => ({ slug: a.slug }));
 }
@@ -23,7 +23,7 @@ export async function generateMetadata({
   params: Params;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const artikel = artikelBeranda.find((a) => a.slug === slug);
+  const artikel = (await ambilArtikel()).find((a) => a.slug === slug);
   if (!artikel) return { title: "Artikel Tidak Ditemukan | EasyTax" };
 
   return {
@@ -57,10 +57,14 @@ export default function HalamanArtikel({ params }: { params: Params }) {
 
 async function IsiArtikelHalaman({ params }: { params: Params }) {
   const { slug } = await params;
+  const [artikelBeranda, detail] = await Promise.all([
+    ambilArtikel(),
+    ambilArtikelDetail(slug),
+  ]);
+
   const artikel = artikelBeranda.find((a) => a.slug === slug);
   if (!artikel) notFound();
 
-  const detail = cariArtikelDetail(slug);
   const blok: BlokIsi[] = detail?.blok ?? [
     { kind: "paragraph", text: artikel.ringkasan },
   ];
