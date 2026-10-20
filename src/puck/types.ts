@@ -41,6 +41,42 @@ export const HALAMAN_PUCK = {
     rute: "/",
     keterangan: "Landing page utama EasyTax.",
   },
+  "tentang-kami": {
+    key: "tentang-kami",
+    judul: "Tentang Kami",
+    rute: "/tentang-kami",
+    keterangan: "Profil perusahaan, visi misi, dan tim.",
+  },
+  kontak: {
+    key: "kontak",
+    judul: "Kontak",
+    rute: "/kontak",
+    keterangan: "Form kontak dan informasi kantor.",
+  },
+  "layanan-listing": {
+    key: "layanan-listing",
+    judul: "Layanan (Halaman Utama)",
+    rute: "/layanan",
+    keterangan: "Halaman listing katalog layanan.",
+  },
+  "tulisan-pajak-listing": {
+    key: "tulisan-pajak-listing",
+    judul: "Tulisan Pajak (Halaman Utama)",
+    rute: "/tulisan-pajak",
+    keterangan: "Halaman listing artikel pajak.",
+  },
+  "template-layanan-detail": {
+    key: "template-layanan-detail",
+    judul: "Template Detail Layanan",
+    rute: "/layanan/[slug]",
+    keterangan: "Template bersama untuk semua halaman detail layanan.",
+  },
+  "template-artikel-detail": {
+    key: "template-artikel-detail",
+    judul: "Template Detail Artikel",
+    rute: "/tulisan-pajak/[slug]",
+    keterangan: "Template bersama untuk semua halaman detail artikel.",
+  },
 } as const satisfies Record<string, HalamanPuck>;
 
 export type KunciHalaman = keyof typeof HALAMAN_PUCK;
