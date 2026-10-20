@@ -13,6 +13,7 @@ import { Media } from "./collections/Media";
 import { Mitra } from "./collections/Mitra";
 import { PageLayouts } from "./collections/PageLayouts";
 import { PesanKontak } from "./collections/PesanKontak";
+import { ReusableComponents } from "./collections/ReusableComponents";
 import { Testimoni } from "./collections/Testimoni";
 import { Tim } from "./collections/Tim";
 import { Users } from "./collections/Users";
@@ -65,6 +66,7 @@ export default buildConfig({
     Mitra,
     PageLayouts,
     PesanKontak,
+    ReusableComponents,
   ],
   globals: [PengaturanSitus],
   editor: lexicalEditor(),

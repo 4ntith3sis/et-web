@@ -77,6 +77,7 @@ export interface Config {
     mitra: Mitra;
     'page-layouts': PageLayout;
     'pesan-kontak': PesanKontak;
+    'reusable-components': ReusableComponent;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -94,6 +95,7 @@ export interface Config {
     mitra: MitraSelect<false> | MitraSelect<true>;
     'page-layouts': PageLayoutsSelect<false> | PageLayoutsSelect<true>;
     'pesan-kontak': PesanKontakSelect<false> | PesanKontakSelect<true>;
+    'reusable-components': ReusableComponentsSelect<false> | ReusableComponentsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -466,6 +468,39 @@ export interface PesanKontak {
   createdAt: string;
 }
 /**
+ * Section atau blok yang dapat ditambahkan kembali ke halaman.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reusable-components".
+ */
+export interface ReusableComponent {
+  id: number;
+  /**
+   * Nama yang terlihat di panel My Components.
+   */
+  nama: string;
+  /**
+   * Ringkasan opsional.
+   */
+  deskripsi?: string | null;
+  kategori?: ('Layout' | 'Konten' | 'Kartu' | 'Interaktif' | 'Section Website' | 'Lain-lain') | null;
+  /**
+   * Struktur komponen (root + content) yang akan disalin ke kanvas.
+   */
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  versi?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -528,6 +563,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pesan-kontak';
         value: number | PesanKontak;
+      } | null)
+    | ({
+        relationTo: 'reusable-components';
+        value: number | ReusableComponent;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -840,6 +879,19 @@ export interface PesanKontakSelect<T extends boolean = true> {
         ip?: T;
         userAgent?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reusable-components_select".
+ */
+export interface ReusableComponentsSelect<T extends boolean = true> {
+  nama?: T;
+  deskripsi?: T;
+  kategori?: T;
+  data?: T;
+  versi?: T;
   updatedAt?: T;
   createdAt?: T;
 }

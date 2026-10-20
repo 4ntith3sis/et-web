@@ -3,6 +3,7 @@ import type { Data } from "@puckeditor/core";
 import type { ArtikelBeranda } from "../data/artikel";
 import type { LayananBeranda } from "../data/layanan";
 import type { Testimoni as ItemTestimoni } from "../data/testimoni";
+import { NAMA_KOMPONEN_GENERIC, type PropsGeneric } from "./komponen/tipe";
 
 /**
  * Kontrak bersama untuk Page Builder (Puck).
@@ -116,7 +117,7 @@ export type PropsCta = {
   emailLabel: string;
 };
 
-export type PropsPuck = {
+export type PropsPuck = PropsGeneric & {
   /** Hero navy dua kolom di puncak beranda. */
   Hero: PropsHero;
   /** Blok keunggulan bergradasi (statis). */
@@ -139,8 +140,8 @@ export type PropsPuck = {
 
 export type NamaKomponenPuck = keyof PropsPuck;
 
-/** Daftar nama komponen yang sah — dipakai validator server. */
-export const NAMA_KOMPONEN_PUCK: NamaKomponenPuck[] = [
+/** Komponen section khas EasyTax (desain final). */
+export const NAMA_KOMPONEN_WEBSITE: NamaKomponenPuck[] = [
   "Hero",
   "Keunggulan",
   "Layanan",
@@ -150,6 +151,12 @@ export const NAMA_KOMPONEN_PUCK: NamaKomponenPuck[] = [
   "MediaNasional",
   "Testimoni",
   "CTA",
+];
+
+/** Daftar nama komponen yang sah — dipakai validator server. */
+export const NAMA_KOMPONEN_PUCK: NamaKomponenPuck[] = [
+  ...NAMA_KOMPONEN_WEBSITE,
+  ...NAMA_KOMPONEN_GENERIC,
 ];
 
 /* ----------------------------------------------------------- Rendering */

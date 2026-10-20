@@ -11,6 +11,7 @@ import type { LayoutPuck } from "@/puck/types";
 
 import { simpanDraft, terbitkanLayout } from "./actions";
 import type { PropsEditorPageBuilder } from "./EditorPageBuilder";
+import PluginReusable from "./PluginReusable";
 
 /**
  * Editor visual Puck untuk satu halaman.
@@ -126,6 +127,7 @@ export function EditorPuck({
         dataRef.current = data;
       }}
       onPublish={(data) => terbitkan(data)}
+      plugins={[PluginReusable as any]}
       overrides={{ headerActions: aksiHeader }}
     />
   );

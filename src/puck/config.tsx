@@ -9,8 +9,9 @@ import { Layanan } from "@/components/sections/Layanan";
 import { MediaNasional } from "@/components/sections/MediaNasional";
 import { MitraView } from "@/components/sections/MitraView";
 import { TestimoniView } from "@/components/sections/TestimoniView";
+import { KATEGORI_KOMPONEN, komponenGenerik } from "@/puck/komponen/puck";
 import { DEFAULT_CTA, DEFAULT_HERO, DEFAULT_JUMLAH } from "@/puck/default-props";
-import { metadataDari, type PropsPuck } from "@/puck/types";
+import { metadataDari, NAMA_KOMPONEN_WEBSITE, type PropsPuck } from "@/puck/types";
 
 /**
  * Registry komponen Page Builder.
@@ -45,7 +46,17 @@ export const puckConfig: Config<PropsPuck> = {
     },
     defaultProps: { title: "", rute: "", kunci: "" },
   },
+  /* Kategori drawer: section khas EasyTax dipisah dari komponen generik agar
+     admin mudah menemukan "Section Website" vs blok layout/konten. */
+  categories: {
+    Layout: { title: "Layout", components: KATEGORI_KOMPONEN.Layout },
+    Konten: { title: "Konten", components: KATEGORI_KOMPONEN.Konten },
+    Kartu: { title: "Kartu", components: KATEGORI_KOMPONEN.Kartu },
+    Interaktif: { title: "Interaktif", components: KATEGORI_KOMPONEN.Interaktif },
+    "Section Website": { title: "Section Website", components: NAMA_KOMPONEN_WEBSITE },
+  },
   components: {
+    ...komponenGenerik,
     Hero: {
       label: "Hero",
       fields: {
