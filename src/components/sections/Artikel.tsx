@@ -141,7 +141,7 @@ function KartuArtikel({ artikel }: { artikel: ArtikelBeranda }) {
     <article className="flex h-full w-full flex-col overflow-hidden rounded-xl border border-garis bg-white shadow-sm transition-[var(--transition-base)] hover:-translate-y-2 hover:shadow-lg">
       <div className="group/thumb relative aspect-video shrink-0 overflow-hidden bg-navy-900">
         <Image
-          src={artikel.gambar}
+          src={artikel.gambar || "/images/placeholder-artikel.svg"}
           alt={artikel.judul}
           fill
           sizes="(max-width: 639px) 92vw, (max-width: 1023px) 50vw, 320px"

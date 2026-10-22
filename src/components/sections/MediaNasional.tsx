@@ -92,7 +92,13 @@ function Wordmark({ nama }: { nama: NamaMedia }) {
   }
 }
 
-export function MediaNasional() {
+export function MediaNasional({
+  desain,
+}: {
+  desain?: { judul?: string };
+} = {}) {
+  const judul = desain?.judul ?? "Telah Diliput Oleh Media Nasional:";
+
   return (
     <section
       id="media"
@@ -104,7 +110,7 @@ export function MediaNasional() {
           id="media-judul"
           className="font-heading text-[0.92rem] leading-none font-extrabold tracking-[0.12em] text-navy-900 uppercase"
         >
-          Telah Diliput Oleh Media Nasional:
+          {judul}
         </h2>
 
         <ul className="flex w-full flex-wrap items-center justify-center gap-x-12 gap-y-9">

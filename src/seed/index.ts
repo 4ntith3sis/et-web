@@ -178,7 +178,7 @@ async function seedAdmin() {
     data: { nama: "Admin EasyTax", email, password, role: "admin" },
     overrideAccess: true,
   });
-  console.log(`+ admin dibuat: ${email} / ${password}`);
+  console.log(`+ admin berhasil dibuat: ${email} (kredensial dari konfigurasi environment)`);
   return user.id;
 }
 

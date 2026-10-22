@@ -78,6 +78,7 @@ export interface Config {
     'page-layouts': PageLayout;
     'pesan-kontak': PesanKontak;
     'reusable-components': ReusableComponent;
+    'nomor-whatsapp': NomorWhatsapp;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -96,6 +97,7 @@ export interface Config {
     'page-layouts': PageLayoutsSelect<false> | PageLayoutsSelect<true>;
     'pesan-kontak': PesanKontakSelect<false> | PesanKontakSelect<true>;
     'reusable-components': ReusableComponentsSelect<false> | ReusableComponentsSelect<true>;
+    'nomor-whatsapp': NomorWhatsappSelect<false> | NomorWhatsappSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -502,6 +504,47 @@ export interface ReusableComponent {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nomor-whatsapp".
+ */
+export interface NomorWhatsapp {
+  id: number;
+  /**
+   * Identitas nomor, mis. 'Konsultasi Umum', 'Konsultan Pajak Utama', atau 'Konsultan A'.
+   */
+  label: string;
+  /**
+   * Format nomor dengan kode negara tanpa simbol '+' (contoh: 6281119200080 atau 6281234567890).
+   */
+  phoneNumber: string;
+  /**
+   * Hanya nomor aktif yang akan diikutsertakan dalam pembagian giliran konsultasi.
+   */
+  enabled?: boolean | null;
+  /**
+   * Angka prioritas (1 = prioritas utama). Digunakan pada strategi Priority/Manual.
+   */
+  priority?: number | null;
+  /**
+   * Peluang relatif pemilihan pada strategi Weighted Random (mis. bobot 3 dipilih 3x lebih sering dari bobot 1).
+   */
+  weight?: number | null;
+  /**
+   * Catatan internal opsional (jadwal shift, penanggung jawab, dll.).
+   */
+  notes?: string | null;
+  /**
+   * Jumlah pengunjung yang telah diarahkan ke nomor ini.
+   */
+  assignedCount?: number | null;
+  /**
+   * Waktu terakhir kali nomor ini dipilih oleh sistem routing.
+   */
+  lastAssignedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -567,6 +610,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'reusable-components';
         value: number | ReusableComponent;
+      } | null)
+    | ({
+        relationTo: 'nomor-whatsapp';
+        value: number | NomorWhatsapp;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -897,6 +944,22 @@ export interface ReusableComponentsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nomor-whatsapp_select".
+ */
+export interface NomorWhatsappSelect<T extends boolean = true> {
+  label?: T;
+  phoneNumber?: T;
+  enabled?: T;
+  priority?: T;
+  weight?: T;
+  notes?: T;
+  assignedCount?: T;
+  lastAssignedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -979,6 +1042,30 @@ export interface PengaturanSitus {
       }[]
     | null;
   /**
+   * Bila dinonaktifkan, tombol konsultasi akan diarahkan ke form kontak atau dinonaktifkan.
+   */
+  whatsappEnabled?: boolean | null;
+  /**
+   * Metode distribusi giliran nomor konsultasi kepada pengunjung.
+   */
+  whatsappRoutingStrategy?: ('round-robin' | 'random' | 'weighted' | 'priority') | null;
+  /**
+   * Pesan pembuka default saat tombol diklik bila tidak ada pesan spesifik dari halaman/layanan.
+   */
+  defaultWhatsAppMessage?: string | null;
+  /**
+   * Nomor cadangan bila seluruh nomor aktif sedang tidak tersedia (contoh: 6281119200080).
+   */
+  fallbackWhatsAppNumber?: string | null;
+  /**
+   * Teks bawaan pada tombol konsultasi di seluruh website.
+   */
+  whatsappButtonLabel?: string | null;
+  /**
+   * Pilih nomor konsultan yang selalu digunakan jika strategi diset ke Priority/Manual.
+   */
+  manualWhatsAppNumber?: (number | null) | NomorWhatsapp;
+  /**
    * Dipakai bila halaman tidak punya judul SEO sendiri.
    */
   seoJudul?: string | null;
@@ -1025,6 +1112,12 @@ export interface PengaturanSitusSelect<T extends boolean = true> {
         url?: T;
         id?: T;
       };
+  whatsappEnabled?: T;
+  whatsappRoutingStrategy?: T;
+  defaultWhatsAppMessage?: T;
+  fallbackWhatsAppNumber?: T;
+  whatsappButtonLabel?: T;
+  manualWhatsAppNumber?: T;
   seoJudul?: T;
   seoDeskripsi?: T;
   updatedAt?: T;

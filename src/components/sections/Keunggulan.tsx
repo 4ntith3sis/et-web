@@ -1,4 +1,5 @@
 import { Bintang, Centang, Jam, Kunci, Medali, TrenNaik } from "@/components/ikon";
+import type { PropsKeunggulan } from "@/puck/types";
 
 const KEUNGGULAN = [
   {
@@ -50,15 +51,31 @@ const ALASAN = [
  * Section "Keunggulan" setelah Hero: kolom kiri berisi headline + tiga
  * keunggulan ringkas, kolom kanan berisi tiga kartu alasan memilih
  * EasyTax (ahli pajak, rekam jejak, strategi yang disesuaikan).
+ *
+ * Teks statis (lencana, judul, deskripsi, perataan) dapat disunting lewat
+ * Page Builder; daftar kartu tetap bagian dari desain final.
  */
-export function Keunggulan() {
+export function Keunggulan({ desain }: { desain?: PropsKeunggulan }) {
+  const lencana = desain?.lencana ?? "Solusi Pajak Terpercaya";
+  const judul = desain?.judul ?? "Mengapa EasyTax?";
+  const deskripsi =
+    desain?.deskripsi ??
+    "Solusi perpajakan terstruktur untuk mendampingi bisnis dan individu menghadapi kompleksitas pajak modern, mengelola kewajiban perpajakan, serta mengambil keputusan dengan lebih percaya diri.";
+  const tengah = desain?.perataan === "tengah";
+
   return (
     <section
       aria-labelledby="keunggulan-judul"
       className="relative overflow-hidden bg-white text-teks-gelap"
     >
       <div className="mx-auto grid w-full max-w-maks grid-cols-1 gap-10 px-6 pt-[clamp(48px,5vw,68px)] pb-[clamp(48px,6.4vw,72px)] md:px-8 lg:grid-cols-[minmax(0,520px)_minmax(0,760px)] lg:items-stretch lg:justify-between lg:gap-10">
-        <div className="relative flex flex-col items-start justify-start">
+        <div
+          className={
+            tengah
+              ? "relative flex flex-col items-center justify-start text-center"
+              : "relative flex flex-col items-start justify-start"
+          }
+        >
           <div
             aria-hidden="true"
             className="absolute top-[138px] left-[155px] h-[330px] w-[330px] rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--color-brand-navy)_5.5%,transparent)_1px,transparent_1.3px)] [background-size:8px_8px] max-lg:hidden"
@@ -68,20 +85,18 @@ export function Keunggulan() {
             <span className="grid h-3.5 w-3.5 place-items-center">
               <TrenNaik className="h-3.5 w-3.5" />
             </span>
-            Solusi Pajak Terpercaya
+            {lencana}
           </p>
 
           <h2
             id="keunggulan-judul"
             className="relative max-w-[520px] font-heading text-[clamp(1.9rem,2.6vw,2.5rem)] leading-[1.15] font-bold tracking-[-0.04em] text-teks-gelap"
           >
-            Mengapa EasyTax?
+            {judul}
           </h2>
 
           <p className="relative mt-4 max-w-[440px] text-[0.98rem] leading-[1.7] text-teks-sekunder">
-            Solusi perpajakan terstruktur untuk mendampingi bisnis dan individu
-            menghadapi kompleksitas pajak modern, mengelola kewajiban
-            perpajakan, serta mengambil keputusan dengan lebih percaya diri.
+            {deskripsi}
           </p>
 
           <ul className="relative mt-10 grid w-full max-w-[520px] grid-cols-3 gap-3 lg:mt-auto lg:pt-10 max-sm:grid-cols-1">

@@ -19,6 +19,12 @@ import "../globals.css";
 import "@payloadcms/next/css";
 import "./custom.scss";
 
+/* Memuat `@font-face` Outfit & Plus Jakarta Sans ke dokumen admin supaya
+   `syncHostStyles` menyalinnya ke kanvas Puck. Tanpa ini kanvas memakai font
+   sistem dan berbeda dari halaman publik. Class variabel dipasang ke wrapper
+   agar `next/font` benar-benar menerbitkan CSS-nya. */
+import { outfit, plusJakarta } from "@/lib/fonts";
+
 type Args = {
   children: React.ReactNode;
 };
@@ -39,7 +45,7 @@ const serverFunction: ServerFunctionClient = async (args) => {
 
 const Layout = ({ children }: Args) => (
   <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>
-    {children}
+    <div className={`${outfit.variable} ${plusJakarta.variable}`}>{children}</div>
   </RootLayout>
 );
 

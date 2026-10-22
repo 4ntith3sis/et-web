@@ -1,5 +1,6 @@
 import { Email, Obrolan } from "@/components/ikon";
 import { Tombol } from "@/components/ui/Tombol";
+import { ConsultationButton } from "@/features/whatsapp/components/ConsultationButton";
 import { situs } from "@/data/situs";
 import { DEFAULT_CTA } from "@/puck/default-props";
 import type { PropsCta } from "@/puck/types";
@@ -39,15 +40,26 @@ export function CTA(props: Partial<PropsCta> = {}) {
           </p>
 
           <div className="relative mt-9 flex flex-wrap items-center justify-center gap-4.5">
-            <Tombol
-              href={ctaHref}
-              external
-              ukuran="sedang"
-              ikonKiri={<Obrolan className="h-4 w-4" />}
-              className="h-[54px] rounded-full px-8 text-[0.98rem]"
-            >
-              {ctaLabel}
-            </Tombol>
+            {!ctaHref || ctaHref.includes("mauorder") || ctaHref.startsWith("/api/konsultasi/whatsapp") ? (
+              <ConsultationButton
+                sumber="cta"
+                ukuran="sedang"
+                ikonKiri={<Obrolan className="h-4 w-4" />}
+                className="h-[54px] rounded-full px-8 text-[0.98rem]"
+              >
+                {ctaLabel}
+              </ConsultationButton>
+            ) : (
+              <Tombol
+                href={ctaHref}
+                external
+                ukuran="sedang"
+                ikonKiri={<Obrolan className="h-4 w-4" />}
+                className="h-[54px] rounded-full px-8 text-[0.98rem]"
+              >
+                {ctaLabel}
+              </Tombol>
+            )}
 
             <Tombol
               href={`mailto:${situs.kontak.email}`}

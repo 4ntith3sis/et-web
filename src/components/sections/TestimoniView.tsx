@@ -39,7 +39,20 @@ function Kartu({ item }: { item: ItemTestimoni }) {
   );
 }
 
-export function TestimoniView({ items }: { items: ItemTestimoni[] }) {
+export function TestimoniView({
+  items,
+  desain,
+}: {
+  items: ItemTestimoni[];
+  desain?: { lencana?: string; judul?: string; deskripsi?: string };
+}) {
+  const lencana = desain?.lencana ?? "Testimoni";
+  const judul =
+    desain?.judul ?? "Pengalaman dari mereka yang sudah kami layani";
+  const deskripsi =
+    desain?.deskripsi ??
+    "Dari UMKM kuliner, retail, agency, hingga korporasi besar, semuanya mempercayakan urusan pajak dan pembukuan kepada EasyTax.";
+
   return (
     <section
       id="testimoni"
@@ -49,20 +62,18 @@ export function TestimoniView({ items }: { items: ItemTestimoni[] }) {
       <div className="mx-auto w-full max-w-maks px-6 md:px-8">
         <div className="flex flex-col items-center text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-yellow-500/60 bg-yellow-500/12 px-5 py-2 text-[0.85rem] font-bold tracking-[0.04em] text-navy-900 uppercase">
-            Testimoni
+            {lencana}
           </span>
 
           <h2
             id="testimoni-judul"
             className="mt-6 max-w-[720px] font-heading text-[clamp(1.6rem,2.8vw,2.2rem)] leading-[1.25] font-bold tracking-[-0.03em] text-navy-900 text-balance"
           >
-            Pengalaman dari mereka yang sudah kami layani
+            {judul}
           </h2>
 
           <p className="mt-4 max-w-[640px] text-[1rem] leading-[1.7] text-teks-sekunder">
-            Dari UMKM kuliner, retail, agency, hingga korporasi besar,
-            semuanya mempercayakan urusan pajak dan pembukuan kepada
-            EasyTax.
+            {deskripsi}
           </p>
         </div>
 

@@ -1,4 +1,7 @@
 import { redirect } from "next/navigation";
+import { PERAN_DIIZINKAN, punyaPeranStaf } from "./role";
+
+export { PERAN_DIIZINKAN, punyaPeranStaf } from "./role";
 
 /**
  * Penjaga akses untuk view kustom Page Builder.
@@ -9,21 +12,18 @@ import { redirect } from "next/navigation";
  * berperan admin/editor sebelum merender apa pun.
  */
 
-export const PERAN_DIIZINKAN = new Set(["admin", "editor"]);
-
 export type StafTerautentikasi = { id: number | string; role: string };
 
 /** Hentikan render dan alihkan ke login bila bukan staf berwenang. */
 export function stafAtauRedirect(user: unknown, kembalike: string): StafTerautentikasi {
   const kandidat = user as { id?: number | string; role?: string } | undefined;
-  const role = kandidat?.role;
   if (!kandidat || kandidat.id === undefined) {
     redirect(`/admin/login?redirect=${encodeURIComponent(kembalike)}`);
   }
-  if (!role || !PERAN_DIIZINKAN.has(role)) {
+  if (!punyaPeranStaf(kandidat)) {
     redirect("/admin");
   }
-  return { id: kandidat.id, role };
+  return { id: kandidat.id, role: kandidat.role };
 }
 
 /** Ambil kunci halaman dari segmen rute admin (`/admin/page-builder/:pageKey`). */

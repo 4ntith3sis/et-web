@@ -21,7 +21,7 @@ export function TentangHero() {
       deskripsi="EasyTax adalah jasa konsultan pajak dan akuntansi yang membantu UMKM dan perusahaan menata kewajiban pajaknya tanpa harus memahami semua detailnya."
       tombolUtama={{
         label: "Konsultasi Gratis",
-        href: situs.whatsappUrl,
+        href: "/api/konsultasi/whatsapp?sumber=tentang-hero",
         eksternal: true,
       }}
       tombolSekunder={{ label: "Lihat Tim", href: "#tim" }}

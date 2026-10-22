@@ -7,12 +7,14 @@
     "build": "next build",
     "start": "next start -p 3004",
     "typecheck": "tsc --noEmit",
+    "test": "EASYTAX_STUB_NEXT_CACHE=1 node --env-file-if-exists=.env --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=DeprecationWarning --import ./scripts/register-payload-loader.mjs --test --test-force-exit \"tests/**/*.test.ts\"",
     "cms": "node --env-file-if-exists=.env --import ./scripts/register-payload-loader.mjs node_modules/payload/bin.js",
     "cms:types": "npm run cms -- generate:types --disable-transpile",
     "cms:importmap": "npm run cms -- generate:importmap --disable-transpile",
     "cms:migrate": "npm run cms -- migrate --disable-transpile",
     "cms:migrate:create": "npm run cms -- migrate:create --disable-transpile",
-    "cms:seed": "npm run cms -- run src/seed/index.ts --disable-transpile"
+    "cms:seed": "npm run cms -- run src/seed/index.ts --disable-transpile",
+    "cms:audit": "npm run cms -- run src/scripts/audit-layout.ts --disable-transpile"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.91.0",

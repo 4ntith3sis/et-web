@@ -8,8 +8,16 @@ import type { FaqLayanan } from "@/data/layanan-detail";
  * FAQ layanan — diport dari `ServiceFAQ` easytax-demo: satu item terbuka
  * pada satu waktu; klik ulang akan menutupnya.
  */
-export function FaqLayanan({ faq }: { faq: FaqLayanan[] }) {
+export function FaqLayanan({
+  faq,
+  desain,
+}: {
+  faq: FaqLayanan[];
+  desain?: { lencana?: string; judul?: string };
+}) {
   const [aktif, setAktif] = useState(0);
+  const lencana = desain?.lencana ?? "FAQ";
+  const judul = desain?.judul ?? "Pertanyaan Seputar Layanan";
 
   if (faq.length === 0) return null;
 
@@ -22,14 +30,14 @@ export function FaqLayanan({ faq }: { faq: FaqLayanan[] }) {
       <div className="mx-auto w-full max-w-maks px-6 md:px-8">
         <div className="mx-auto mb-10 max-w-[680px] text-center">
           <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-yellow-500/60 bg-yellow-500/12 px-5 py-2 text-[0.85rem] font-bold tracking-[0.04em] text-navy-900 uppercase">
-            FAQ
+            {lencana}
           </span>
 
           <h2
             id="faq-judul"
             className="font-heading text-[clamp(1.7rem,3vw,2.35rem)] leading-[1.25] font-bold text-navy-900"
           >
-            Pertanyaan Seputar Layanan
+            {judul}
           </h2>
         </div>
 

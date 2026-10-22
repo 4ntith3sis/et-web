@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import type { Payload } from "payload";
 
 import { getClient } from "@/lib/payload";
+import { perbaruiKonten } from "@/cms/revalidate";
 import { layoutDefault } from "@/puck/default-layouts";
 import { halamanDariKey, type LayoutPuck } from "@/puck/types";
 import { validasiLayoutPuck } from "@/puck/validation";
@@ -55,7 +56,13 @@ async function dokumenAtauBuat(payload: Payload, pageKey: string) {
     draft: true,
     overrideAccess: true,
   });
-  if (ada.docs[0]) return ada.docs[0];
+  /* `draft: true` bisa memunculkan dokumen "hantu" bila versi draft-nya ada
+     tetapi dokumen induknya sudah tidak ada: Payload mengembalikan entri itu
+     dengan `id` null. Entri tanpa id tidak bisa di-`update` (Payload
+     memperlakukannya sebagai bulk update dan menolak tanpa `where`), jadi
+     diperlakukan sebagai "belum ada" dan dibuat ulang. */
+  const adaId = ada.docs[0] && (ada.docs[0] as { id?: unknown }).id != null;
+  if (adaId) return ada.docs[0];
 
   const awal = layoutDefault(pageKey) ?? { root: {}, content: [] };
   return payload.create({
@@ -140,7 +147,17 @@ export async function terbitkanLayout(
       overrideAccess: true,
     });
 
-    revalidatePath(halaman.rute);
+    /* Invalidasi cache:
+       - `perbaruiKonten` (updateTag) membuat cache layout kedaluwarsa seketika
+         sehingga permintaan publik berikutnya langsung memakai layout baru.
+       - `revalidatePath` menyegarkan shell halaman pada rute tersebut.
+         Rute template punya segmen dinamis (`/layanan/[slug]`); Next.js
+         memerlukan argumen `type` untuk pola dinamis, tanpa itu pemanggilan
+         hanya menghasilkan peringatan dan tidak menginvalidasi apa pun.
+       Hook `afterChange` koleksi juga memanggil `revalidateTag` sehingga
+       publish dari luar Page Builder (mis. Payload Admin) ikut tercache. */
+    await perbaruiKonten(`layout:${pageKey}`);
+    revalidatePath(halaman.rute, halaman.rute.includes("[") ? "page" : undefined);
     revalidatePath(`/pratinjau/${pageKey}`);
 
     return {

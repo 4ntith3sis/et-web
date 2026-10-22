@@ -43,6 +43,19 @@ export const bacaTerbitAtauStaf: Access = ({ req: { user } }) => {
   return { _status: { equals: "published" } };
 };
 
+/** Anonymous callers may inspect only published snapshots in version history. */
+export const bacaVersiTerbitAtauStaf: Access = ({ req: { user } }) => {
+  if (user) return true;
+  return { "version._status": { equals: "published" } };
+};
+
+
 /** Field-level: hanya admin boleh mengubah field sensitif. */
 export const fieldAdminSaja: FieldAccess = ({ req: { user } }) =>
   peran(user) === "admin";
+
+/** Field-level: staf penulis (admin atau editor) boleh membaca/mengubah field sensitif. */
+export const fieldStafPenulis: FieldAccess = ({ req: { user } }) => {
+  const p = peran(user);
+  return p === "admin" || p === "editor";
+};

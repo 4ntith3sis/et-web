@@ -2,6 +2,7 @@ import { SetStepNav } from "@payloadcms/ui";
 import Link from "next/link";
 import type { AdminViewServerProps } from "payload";
 
+import { urlPratinjauHalaman } from "@/cms/layout";
 import { DAFTAR_HALAMAN } from "@/puck/types";
 
 import { stafAtauRedirect } from "./penjaga";
@@ -31,6 +32,17 @@ export async function ViewDaftar(props: AdminViewServerProps) {
     }),
   );
 
+  /* URL Preview konkret per halaman. Halaman statis memakai rutenya sendiri;
+     template dinamis (`/layanan/[slug]`, `/tulisan-pajak/[slug]`) dipetakan ke
+     slug record nyata dari Payload, atau `null` bila belum ada data. */
+  const urlPratinjau = new Map(
+    await Promise.all(
+      DAFTAR_HALAMAN.map(
+        async (h) => [h.key, await urlPratinjauHalaman(h.key, h.rute)] as const,
+      ),
+    ),
+  );
+
   return (
     <TemplatAdmin props={props}>
     {/* View kustom tidak mengisi StepNav Payload; tanpa ini breadcrumb header
@@ -54,73 +66,141 @@ export async function ViewDaftar(props: AdminViewServerProps) {
           Page Builder
         </h1>
         <p style={{ margin: 0, color: "#4b5563", lineHeight: 1.6, maxWidth: 620 }}>
-          Susun tata letak halaman secara visual. Perubahan disimpan sebagai
-          draft sampai Anda menekan Publish di editor.
+          Susun tata letak halaman secara visual. Perubahan tampil di Pratinjau
+          hingga Anda menekan Publish di editor untuk memperbarui halaman publik.
         </p>
       </header>
 
-      <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 12 }}>
-        {DAFTAR_HALAMAN.map((halaman) => {
-          const dok = peta.get(halaman.key);
-          const jumlah = dok?.revision ?? 0;
-          const terbit = dok?._status === "published";
-          return (
-            <li
-              key={halaman.key}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 16,
-                border: "1px solid #e5e7eb",
-                borderRadius: 10,
-                padding: "16px 18px",
-                background: "#fff",
-              }}
-            >
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <strong style={{ fontSize: 16 }}>{halaman.judul}</strong>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      padding: "2px 8px",
-                      borderRadius: 999,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.04em",
-                      background: terbit ? "#dcfce7" : "#fef3c7",
-                      color: terbit ? "#166534" : "#92400e",
-                    }}
-                  >
-                    {terbit ? "Terbit" : dok ? "Draft" : "Belum ada"}
-                  </span>
-                </div>
-                <p style={{ margin: "6px 0 0", color: "#6b7280", fontSize: 13 }}>
-                  {halaman.keterangan} · <code>{halaman.rute}</code>
-                  {jumlah > 0 ? ` · revisi ${jumlah}` : ""}
-                </p>
-              </div>
+      {(() => {
+        const grup = {
+          statis: [] as typeof DAFTAR_HALAMAN,
+          listing: [] as typeof DAFTAR_HALAMAN,
+          template: [] as typeof DAFTAR_HALAMAN,
+        };
+        for (const h of DAFTAR_HALAMAN) {
+          if (h.key.includes("template")) {
+            grup.template.push(h);
+          } else if (h.key.includes("listing")) {
+            grup.listing.push(h);
+          } else {
+            grup.statis.push(h);
+          }
+        }
+        const renderGrup = (judul: string, items: typeof DAFTAR_HALAMAN) =>
+          items.length > 0 && (
+            <div key={judul} style={{ marginBottom: 24 }}>
+              <h2 style={{ fontSize: 14, fontWeight: 700, margin: "0 0 12px", color: "#374151" }}>
+                {judul}
+              </h2>
+              <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 12 }}>
+                {items.map((halaman) => {
+                  const dok = peta.get(halaman.key);
+                  const jumlah = dok?.revision ?? 0;
+                  const terbit = dok?._status === "published";
+                  const pratinjau = urlPratinjau.get(halaman.key) ?? null;
+                  return (
+                    <li
+                      key={halaman.key}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 16,
+                        border: "1px solid #e5e7eb",
+                        borderRadius: 10,
+                        padding: "16px 18px",
+                        background: "#fff",
+                      }}
+                    >
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <strong style={{ fontSize: 16 }}>{halaman.judul}</strong>
+                          <span
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 700,
+                              padding: "2px 8px",
+                              borderRadius: 999,
+                              textTransform: "uppercase",
+                              letterSpacing: "0.04em",
+                              background: terbit ? "#dcfce7" : "#fef3c7",
+                              color: terbit ? "#166534" : "#92400e",
+                            }}
+                          >
+                            {terbit ? "Terbit" : dok ? "Draft" : "Belum ada"}
+                          </span>
+                        </div>
+                        <p style={{ margin: "6px 0 0", color: "#6b7280", fontSize: 13 }}>
+                          {halaman.keterangan} · <code>{halaman.rute}</code>
+                          {jumlah > 0 ? ` · revisi ${jumlah}` : ""}
+                        </p>
+                      </div>
 
-              <Link
-                href={`/admin/page-builder/${halaman.key}`}
-                style={{
-                  flexShrink: 0,
-                  padding: "9px 16px",
-                  borderRadius: 8,
-                  background: "#111827",
-                  color: "#fff",
-                  fontWeight: 700,
-                  fontSize: 14,
-                  textDecoration: "none",
-                }}
-              >
-                Buka editor
-              </Link>
-            </li>
+                      <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                        <Link
+                          href={`/admin/page-builder/${halaman.key}`}
+                          style={{
+                            padding: "9px 16px",
+                            borderRadius: 8,
+                            background: "#111827",
+                            color: "#fff",
+                            fontWeight: 700,
+                            fontSize: 14,
+                            textDecoration: "none",
+                          }}
+                        >
+                          Edit
+                        </Link>
+                        {pratinjau ? (
+                          <Link
+                            href={pratinjau}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              padding: "9px 16px",
+                              borderRadius: 8,
+                              background: "#f3f4f6",
+                              color: "#111827",
+                              fontWeight: 700,
+                              fontSize: 14,
+                              textDecoration: "none",
+                              border: "1px solid #e5e7eb",
+                            }}
+                          >
+                            Preview
+                          </Link>
+                        ) : (
+                          <span
+                            title="Belum ada data untuk dipratinjau"
+                            style={{
+                              padding: "9px 16px",
+                              borderRadius: 8,
+                              background: "#f9fafb",
+                              color: "#9ca3af",
+                              fontWeight: 700,
+                              fontSize: 14,
+                              border: "1px dashed #e5e7eb",
+                              cursor: "not-allowed",
+                            }}
+                          >
+                            Preview
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           );
-        })}
-      </ul>
+        return (
+          <>
+            {renderGrup("Halaman Statis", grup.statis)}
+            {renderGrup("Halaman Listing", grup.listing)}
+            {renderGrup("Template Detail", grup.template)}
+          </>
+        );
+      })()}
 
       <p style={{ marginTop: 24 }}>
         <Link href="/admin" style={{ color: "#2563eb", fontSize: 14 }}>

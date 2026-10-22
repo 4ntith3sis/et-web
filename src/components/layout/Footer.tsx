@@ -27,7 +27,7 @@ export async function Footer() {
       Ikon: Instagram,
     },
     { label: "TikTok", href: "https://www.tiktok.com/@easytax.id", Ikon: TikTok },
-    { label: "WhatsApp", href: situs.whatsappUrl, Ikon: WhatsApp },
+    { label: "WhatsApp", href: "/api/konsultasi/whatsapp?sumber=footer-sosmed", Ikon: WhatsApp },
   ];
 
   return (
@@ -126,7 +126,7 @@ export async function Footer() {
               <li className="flex items-start gap-3 text-[0.92rem]">
                 <WhatsApp className="mt-0.75 h-4.5 w-4.5 shrink-0 text-yellow-500" />
                 <a
-                  href={situs.whatsappUrl}
+                  href="/api/konsultasi/whatsapp?sumber=footer-kontak"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-block py-1 text-teks-terang no-underline transition-colors hover:text-yellow-500"

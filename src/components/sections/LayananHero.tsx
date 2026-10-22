@@ -19,7 +19,7 @@ export function LayananHero() {
       deskripsi="Mulai dari pelaporan SPT tahunan, pembukuan bulanan, hingga pendampingan audit dan pengurusan PKP. Dikelola langsung oleh konsultan pajak berizin resmi (BKP) dan berpengalaman menangani berbagai industri di Indonesia."
       tombolUtama={{
         label: "Konsultasi Gratis",
-        href: situs.whatsappUrl,
+        href: "/api/konsultasi/whatsapp?sumber=layanan-hero",
         eksternal: true,
       }}
       tombolSekunder={{ label: "Eksplorasi Layanan", href: "#katalog-layanan" }}

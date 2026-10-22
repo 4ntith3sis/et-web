@@ -40,7 +40,16 @@ const LANGKAH = [
  * panah kuning di antara kartu menunjukkan alur: satu kolom → panah ke bawah,
  * dua kolom → panah antar kolom + penghubung antar baris, empat kolom → kanan.
  */
-export function CaraKerja() {
+export function CaraKerja({
+  desain,
+}: {
+  desain?: { lencana?: string; judul?: string };
+} = {}) {
+  const lencana = desain?.lencana ?? "Cara Kerja";
+  const judul =
+    desain?.judul ??
+    "Empat langkah sederhana untuk menyelesaikan urusan pajak yang rumit.";
+
   return (
     <section
       id="cara-kerja"
@@ -51,14 +60,14 @@ export function CaraKerja() {
         <div className="relative flex flex-col items-center text-center">
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 text-[0.85rem] font-bold tracking-[0.04em] text-white uppercase">
             <TrenNaik className="h-3.5 w-3.5 text-yellow-500" />
-            Cara Kerja
+            {lencana}
           </span>
 
           <h2
             id="cara-kerja-judul"
             className="mt-6 max-w-[720px] font-heading text-[clamp(1.7rem,3vw,2.35rem)] leading-[1.2] font-bold tracking-[-0.03em] text-white"
           >
-            Empat langkah sederhana untuk menyelesaikan urusan pajak yang rumit.
+            {judul}
           </h2>
         </div>
 

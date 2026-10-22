@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: easytax-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-easytax}
+      POSTGRES_USER: ${POSTGRES_USER:-easytax}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD wajib diisi}
+    ports:
+      # Port host untuk inspeksi lokal developer (hanya loopback 127.0.0.1 agar tidak terbuka ke internet)
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-easytax} -d ${POSTGRES_DB:-easytax}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: easytax-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URI: postgresql://${POSTGRES_USER:-easytax}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD wajib diisi}@postgres:5432/${POSTGRES_DB:-easytax}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-easytax}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD wajib diisi}@postgres:5432/${POSTGRES_DB:-easytax}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET:?PAYLOAD_SECRET wajib diatur (minimal 32 karakter)}
+      PAYLOAD_PUBLIC_SERVER_URL: ${PAYLOAD_PUBLIC_SERVER_URL:-http://localhost:3004}
+      PAYLOAD_CACHE_COMPONENTS_ENABLED: "true"
+      PORT: 3004
+      RUN_MIGRATIONS: "false"
+    ports:
+      - "${PORT:-3004}:3004"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
+
+volumes:
+  postgres_data:
+    name: easytax_postgres_data

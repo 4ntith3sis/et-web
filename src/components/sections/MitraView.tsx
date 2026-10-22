@@ -24,8 +24,21 @@ const FAKTA = [
   { nilai: "BKP & IAPI", label: "sertifikasi konsultan" },
 ];
 
-export function MitraView({ items }: { items: { nama: string; src: string }[] }) {
+export function MitraView({
+  items,
+  desain,
+}: {
+  items: { nama: string; src: string }[];
+  desain?: { lencana?: string; judul?: string; deskripsi?: string };
+}) {
   const DAFTAR = ulangi(items);
+  const lencana = desain?.lencana ?? "Mitra yang sudah percaya";
+  const judul =
+    desain?.judul ??
+    "Ribuan UMKM dan perusahaan mempercayakan pajaknya kepada EasyTax";
+  const deskripsi =
+    desain?.deskripsi ??
+    "Pembukuan, perizinan PKP, sampai pelaporan SPT, semuanya ditangani tenaga ahli berlisensi dengan proses yang aman dan terlacak.";
 
   return (
     <section
@@ -37,21 +50,18 @@ export function MitraView({ items }: { items: { nama: string; src: string }[] })
         <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-[560px]">
             <span className="inline-flex items-center gap-2 rounded-full border border-yellow-500/60 bg-yellow-500/12 px-5 py-2 text-[0.85rem] font-bold tracking-[0.04em] text-navy-900 uppercase">
-              Mitra yang sudah percaya
+              {lencana}
             </span>
 
             <h2
               id="mitra-judul"
               className="mt-6 font-heading text-[clamp(1.6rem,2.8vw,2.2rem)] leading-[1.25] font-bold tracking-[-0.03em] text-navy-900 text-balance"
             >
-              Ribuan UMKM dan perusahaan mempercayakan pajaknya kepada
-              EasyTax
+              {judul}
             </h2>
 
             <p className="mt-4 text-[1rem] leading-[1.7] text-teks-sekunder">
-              Pembukuan, perizinan PKP, sampai pelaporan SPT, semuanya
-              ditangani tenaga ahli berlisensi dengan proses yang aman dan
-              terlacak.
+              {deskripsi}
             </p>
           </div>
 

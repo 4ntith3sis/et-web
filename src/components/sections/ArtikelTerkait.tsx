@@ -42,7 +42,7 @@ export function ArtikelTerkait({ artikel }: { artikel: ArtikelBeranda[] }) {
               <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-garis bg-white shadow-sm transition-[var(--transition-base)] hover:-translate-y-2 hover:shadow-xl">
                 <div className="relative h-[150px] shrink-0 overflow-hidden bg-navy-900">
                   <Image
-                    src={a.gambar}
+                    src={a.gambar || "/images/placeholder-artikel.svg"}
                     alt={a.judul}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

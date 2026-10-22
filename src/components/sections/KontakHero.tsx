@@ -18,7 +18,7 @@ const kartuKontak = [
     nilai: "0811-1920-0080",
     teks: "Respons rata-rata kurang dari 5 menit. Tersedia Senin–Jumat, 09:00–17:00 WIB.",
     aksi: "Mulai chat WhatsApp",
-    href: situs.whatsappUrl,
+    href: "/api/konsultasi/whatsapp?sumber=kontak-hero",
     eksternal: true,
     sorot: true,
   },

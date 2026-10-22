@@ -18,7 +18,26 @@ const nextConfig: NextConfig = {
     },
   },
   cacheComponents: true,
-  partialPrefetching: true,
+  // Pertahankan halaman yang telah dikompilasi di memori dev server lebih lama
+  // agar navigasi bolak-balik antar halaman tidak memicu re-compilation berulang.
+  onDemandEntries: {
+    maxInactiveAge: 15 * 60 * 1000,
+    pagesBufferLength: 25,
+  },
+  experimental: {
+    optimizePackageImports: ["@puckeditor/core"],
+  },
+  // Dimatikan karena bug pada Payload 3.91: saat Partial Prefetching aktif,
+  // Next merender ulang route admin yang sudah terautentikasi dalam konteks
+  // prefetch dan menandai `new Date()` di dalam operasi sesi Payload
+  // (`authenticate` -> `removeExpiredSessions`) sebagai blocking prerender:
+  // 'Route "/admin/[[...segments]]": Next.js encountered the unstable value
+  // `new Date()` while prerendering.'
+  // `instant = false` / `prefetch = 'force-disabled'` per-route TIDAK
+  // mempan; hanya opsi ini yang menghilangkan errornya. Perbaikan permanen
+  // menyusul di rilis Payload mayor berikutnya (payloadcms/payload#18065,
+  // PR #18694/#18702). Aktifkan lagi setelah Payload dinaikkan ke versi itu.
+  partialPrefetching: false,
   images: {
     // Payload menyusun URL media absolut dari PAYLOAD_PUBLIC_SERVER_URL, sehingga
     // optimizer next/image mengambilnya lewat jaringan. Di dev host-nya localhost

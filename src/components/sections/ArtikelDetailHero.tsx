@@ -66,7 +66,7 @@ export function ArtikelDetailHero({
       <div className="relative z-10 mx-auto mt-9 w-full max-w-[1000px] -mb-14 2xl:max-w-[1120px]">
         <div className="relative h-[260px] overflow-hidden rounded-2xl border border-white/15 bg-navy-900 shadow-xl sm:h-[340px] lg:h-[420px] 2xl:h-[460px]">
           <Image
-            src={artikel.gambar}
+            src={artikel.gambar || "/images/placeholder-artikel.svg"}
             alt={artikel.judul}
             fill
             priority

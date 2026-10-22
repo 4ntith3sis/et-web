@@ -102,7 +102,7 @@ export function DaftarLayanan({ layanan }: { layanan: LayananBeranda[] }) {
                 <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-garis bg-white shadow-sm transition-[var(--transition-base)] hover:shadow-xl">
                   <div className="relative h-[200px] w-full shrink-0 overflow-hidden border-b border-garis bg-netral-lat">
                     <Image
-                      src={layanan.gambar}
+                      src={layanan.gambar || "/images/placeholder-layanan.svg"}
                       alt={layanan.judul}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

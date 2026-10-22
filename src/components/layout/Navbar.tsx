@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 
 import { Menu, Tutup, Obrolan } from "@/components/ikon";
 import { Tombol } from "@/components/ui/Tombol";
+import { ConsultationButton } from "@/features/whatsapp/components/ConsultationButton";
 import { cn } from "@/lib/cn";
 import { logoMark } from "@/data/situs";
 import type { ItemNavigasi } from "@/types";
@@ -125,15 +126,14 @@ export function Navbar({
 
         {/* Aksi kanan */}
         <div className="flex items-center gap-4">
-          <Tombol
-            href={whatsappUrl}
-            external
+          <ConsultationButton
+            sumber="navbar"
             ukuran="kecil"
             ikonKiri={<Obrolan className="h-4 w-4" />}
             className="hidden lg:inline-flex"
           >
             Konsultasi Gratis
-          </Tombol>
+          </ConsultationButton>
 
           <button
             type="button"
@@ -179,15 +179,14 @@ export function Navbar({
         </ul>
 
         <div className="px-6 pt-2 pb-6">
-          <Tombol
-            href={whatsappUrl}
-            external
+          <ConsultationButton
+            sumber="navbar-mobile"
             ukuran="besar"
             ikonKiri={<Obrolan className="h-5 w-5" />}
             className="w-full"
           >
             Konsultasi Gratis
-          </Tombol>
+          </ConsultationButton>
         </div>
       </div>
     </header>

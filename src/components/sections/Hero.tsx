@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import { Centang, Medali, PanahKanan, Perisai } from "@/components/ikon";
 import { Tombol } from "@/components/ui/Tombol";
+import { ConsultationButton } from "@/features/whatsapp/components/ConsultationButton";
 import { DEFAULT_HERO } from "@/puck/default-props";
 import type { PropsHero } from "@/puck/types";
 
@@ -53,15 +54,26 @@ export function Hero(props: Partial<PropsHero> = {}) {
           </p>
 
           <div className="mb-[30px] flex flex-wrap gap-4">
-            <Tombol
-              href={ctaHref}
-              external
-              ukuran="sedang"
-              ikonKanan={<PanahKanan className="h-4 w-4" />}
-              className="h-[54px] rounded-full px-9 text-[1rem]"
-            >
-              {ctaLabel}
-            </Tombol>
+            {!ctaHref || ctaHref.includes("mauorder") || ctaHref.startsWith("/api/konsultasi/whatsapp") ? (
+              <ConsultationButton
+                sumber="hero"
+                ukuran="sedang"
+                ikonKanan={<PanahKanan className="h-4 w-4" />}
+                className="h-[54px] rounded-full px-9 text-[1rem]"
+              >
+                {ctaLabel}
+              </ConsultationButton>
+            ) : (
+              <Tombol
+                href={ctaHref}
+                external
+                ukuran="sedang"
+                ikonKanan={<PanahKanan className="h-4 w-4" />}
+                className="h-[54px] rounded-full px-9 text-[1rem]"
+              >
+                {ctaLabel}
+              </Tombol>
+            )}
             <Tombol
               href={cta2Href}
               varian="garisPutih"
