@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
     },
   },
   cacheComponents: true,
+  // Saat diuji lewat 127.0.0.1, Next memblokir resource dev (termasuk HMR)
+  // karena origin dianggap lintas host. Izinkan loopback agar hidrasi UI tetap
+  // berjalan baik lewat localhost maupun 127.0.0.1. Opsi ini hanya untuk dev.
+  allowedDevOrigins: ["127.0.0.1"],
   // Pertahankan halaman yang telah dikompilasi di memori dev server lebih lama
   // agar navigasi bolak-balik antar halaman tidak memicu re-compilation berulang.
   onDemandEntries: {

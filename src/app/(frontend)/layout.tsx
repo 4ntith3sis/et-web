@@ -20,17 +20,9 @@ import "../globals.css";
  * mewarisi chrome maupun metadata situs publik.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const situs = await ambilSitus();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://easytax.id";
   return {
     metadataBase: new URL(siteUrl),
-    title: `${situs.nama} - Jasa Konsultan Pajak dan Akuntansi Perusahaan`,
-    description: situs.deskripsi,
-    openGraph: {
-      locale: "id_ID",
-      siteName: situs.nama,
-      type: "website",
-    },
   };
 }
 

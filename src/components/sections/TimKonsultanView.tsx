@@ -36,10 +36,9 @@ export function TimKonsultanView({ tim }: { tim: AnggotaTim[] }) {
           </h2>
 
           <p className="mt-4 max-w-[620px] text-[1rem] leading-[1.7] text-white/70">
-            Akmal Abdul Arik (Level A), Risa Rizki Sharon (Level B), Maya
-            Puspita (Level B), dan Bima Prasetyo (Level C) menangani klien
-            sesuai keahlian di bidangnya, bukan sekadar berkas yang diunggah ke
-            sistem.
+            Tim kami mendampingi setiap klien dengan solusi yang disesuaikan
+            dengan kebutuhan dan bidang usahanya, bukan sekadar mengelola berkas
+            yang diunggah ke sistem.
           </p>
         </div>
 

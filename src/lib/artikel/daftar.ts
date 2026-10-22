@@ -1,4 +1,4 @@
-import { ambilKategori } from "@/components/sections/DaftarArtikel";
+import { ambilKategori } from "@/lib/artikel/kategori";
 import type { ArtikelBeranda } from "@/data/artikel";
 import type { LayoutPuck } from "@/puck/types";
 

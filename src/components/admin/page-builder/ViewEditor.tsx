@@ -7,6 +7,7 @@ import { layoutDefault } from "@/puck/default-layouts";
 import { lengkapiLayoutDefaultProps } from "@/puck/default-props";
 import { halamanDariKey, terapkanRoot, type LayoutPuck } from "@/puck/types";
 import { validasiLayoutPuck } from "@/puck/validation";
+import { bolehEditDenganPuck } from "@/puck/editor-policy";
 
 import { EditorPageBuilder } from "./EditorPageBuilder";
 import { kunciHalamanDariSegmen, stafAtauRedirect } from "./penjaga";
@@ -23,6 +24,9 @@ import { TemplatAdmin } from "./TemplatAdmin";
 export async function ViewEditor(props: AdminViewServerProps) {
   const pageKey = kunciHalamanDariSegmen(props.params);
   stafAtauRedirect(props.user, `/admin/page-builder/${pageKey}`);
+
+  // URL lama atau request buatan tangan untuk halaman selain beranda ditolak.
+  if (!bolehEditDenganPuck(pageKey)) notFound();
 
   const halaman = halamanDariKey(pageKey);
   if (!halaman) notFound();

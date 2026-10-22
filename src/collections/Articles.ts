@@ -4,6 +4,7 @@ import { adminSaja, bacaTerbitAtauStaf, stafPenulis } from "../access";
 import { hookRevalidate } from "../cms/revalidate";
 import { fieldSeo } from "../fields/seo";
 import { formatSlug } from "../lib/slug";
+import { hookIndexArtikelRAG, hookHapusArtikelRAG } from "../rag/hooks";
 
 /**
  * Articles (Artikel) — sumber data untuk artikel perpajakan.
@@ -29,8 +30,8 @@ export const Articles: CollectionConfig = {
         return data;
       },
     ],
-    afterChange: [hookRevalidate("artikel")],
-    afterDelete: [hookRevalidate("artikel")],
+    afterChange: [hookRevalidate("artikel"), hookIndexArtikelRAG],
+    afterDelete: [hookRevalidate("artikel"), hookHapusArtikelRAG],
   },
   access: {
     read: bacaTerbitAtauStaf,

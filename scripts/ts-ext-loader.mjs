@@ -70,6 +70,12 @@ export async function resolve(specifier, context, nextResolve) {
     return { url: STUB_NEXT_CACHE_URL, shortCircuit: true };
   }
 
+  // `next/server` tidak punya entri ESM tanpa ekstensi. Next.js membangunnya
+  // lewat bundler, tetapi test runner Node memerlukan `next/server.js`.
+  if (specifier === "next/server") {
+    return nextResolve("next/server.js", context);
+  }
+
   const alias = keJalur(specifier);
   if (alias) {
     const url = pathToFileURL(alias).href;

@@ -3,11 +3,11 @@
 # ==============================================================================
 # Stage 1: Dependencies
 # ==============================================================================
-FROM node:20-alpine AS deps
+FROM node:20-bookworm-slim AS deps
 WORKDIR /app
 
 # Install dependensi sistem yang dibutuhkan untuk build native modul (sharp/node-gyp jika ada)
-RUN apk add --no-cache libc6-compat
+RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 # Salin manifest dependensi
 COPY package.json package-lock.json ./
@@ -18,7 +18,7 @@ RUN npm ci
 # ==============================================================================
 # Stage 2: Builder
 # ==============================================================================
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS builder
 WORKDIR /app
 
 # Salin modul dari stage deps
@@ -38,15 +38,16 @@ RUN npm run build
 # ==============================================================================
 # Stage 3: Runner (Production)
 # ==============================================================================
-FROM node:20-alpine AS runner
+FROM node:20-bookworm-slim AS runner
 WORKDIR /app
 
-RUN apk add --no-cache libc6-compat curl
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3004
 ENV HOSTNAME="0.0.0.0"
+ENV RAG_EMBEDDING_CACHE_DIR=/app/model-cache
 
 # Buat grup dan user non-root demi keamanan kontainer
 RUN addgroup --system --gid 1001 nodejs && \
@@ -65,6 +66,10 @@ COPY --from=builder --chmod=755 /app/docker/entrypoint.sh ./docker/entrypoint.sh
 
 # Atur kepemilikan berkas ke user non-root
 RUN chown -R nextjs:nodejs /app
+# Cache model tidak dibundel ke image (ukurannya besar dan bukan artefak build).
+# Untuk mengaktifkan RAG, mount cache read-only ke /app/model-cache atau salin
+# lewat pipeline deployment yang menyediakan artifact model.
+RUN mkdir -p /app/model-cache && chown -R nextjs:nodejs /app/model-cache
 
 USER nextjs
 

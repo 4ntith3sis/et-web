@@ -9,6 +9,7 @@ import { perbaruiKonten } from "@/cms/revalidate";
 import { layoutDefault } from "@/puck/default-layouts";
 import { halamanDariKey, type LayoutPuck } from "@/puck/types";
 import { validasiLayoutPuck } from "@/puck/validation";
+import { bolehEditDenganPuck } from "@/puck/editor-policy";
 
 /**
  * Server actions Page Builder.
@@ -45,6 +46,9 @@ async function penggunaStaf(): Promise<{ payload: Payload; userId: number | stri
 }
 
 async function dokumenAtauBuat(payload: Payload, pageKey: string) {
+  if (!bolehEditDenganPuck(pageKey)) {
+    throw new Error("Puck Page Builder hanya dapat mengubah halaman Beranda.");
+  }
   const halaman = halamanDariKey(pageKey);
   if (!halaman) throw new Error(`Halaman "${pageKey}" tidak dikenal.`);
 
@@ -94,6 +98,9 @@ export async function simpanDraft(
   layout: LayoutPuck,
   revision: number,
 ): Promise<HasilSimpan> {
+  if (!bolehEditDenganPuck(pageKey)) {
+    return { ok: false, error: "Puck Page Builder hanya dapat mengubah halaman Beranda." };
+  }
   try {
     const { payload } = await penggunaStaf();
     const valid = validasiLayoutPuck(layout);
@@ -124,6 +131,9 @@ export async function terbitkanLayout(
   layout: LayoutPuck,
   revision: number,
 ): Promise<HasilSimpan> {
+  if (!bolehEditDenganPuck(pageKey)) {
+    return { ok: false, error: "Puck Page Builder hanya dapat mengubah halaman Beranda." };
+  }
   try {
     const { payload, userId } = await penggunaStaf();
     const valid = validasiLayoutPuck(layout);

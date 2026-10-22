@@ -1,10 +1,4 @@
 import Link from "next/link";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Halaman Tidak Ditemukan | EasyTax",
-  description: "Halaman yang Anda cari tidak ditemukan atau telah dipindahkan.",
-};
 
 export default function NotFound() {
   return (

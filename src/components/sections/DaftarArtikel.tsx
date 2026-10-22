@@ -1,25 +1,22 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
+import { useState } from "react";
 import { Cari, Jam, PanahKanan } from "@/components/ikon";
+import { ArtikelSearchControl } from "@/components/sections/ArtikelSearchControl";
+import { ambilKategori, type KategoriArtikel } from "@/lib/artikel/kategori";
 import type { ArtikelBeranda } from "@/data/artikel";
 
 /**
  * Daftar artikel untuk halaman /tulisan-pajak (gaya editorial).
  *
- * Form pencarian + filter kategori tepat setelah pengantar, lalu grid
- * "Artikel Terbaru" (1/2/3 kolom per breakpoint) dan paginasi. Semua
- * state disimpan di URL (`q`, `kategori`, `page`) supaya halaman tetap
- * bisa di-bookmark dan di-share, dan supaya server yang menyaring data.
+ * Search semantic dan filter kategori tampil sebelum grid artikel. Filter
+ * kategori/paginasi lama tetap memakai URL dan pencarian keyword server-side.
  */
 
-export type Kategori = { slug: string; nama: string };
-
-export function ambilKategori(artikel: ArtikelBeranda[]): Kategori[] {
-  const peta = new Map<string, string>();
-  for (const a of artikel) peta.set(a.kategori, a.kategori.toLowerCase());
-  return [...peta].map(([nama, slug]) => ({ nama, slug }));
-}
+export type Kategori = KategoriArtikel;
 
 function tautanHalaman(page: number, kategori?: string, q?: string): string {
   const params = new URLSearchParams();
@@ -55,40 +52,28 @@ export function DaftarArtikel({
   totalDocs,
   kueri = "",
 }: Prop) {
+  type HasilSemantik = { id: number; judul: string; slug: string; ringkasan: string; url: string; relevansi: number; kategori?: string };
+  const [searchResults, setSearchResults] = useState<HasilSemantik[] | null>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [showAllCategoriesNote, setShowAllCategoriesNote] = useState(false);
+  const [searchSubmitted, setSearchSubmitted] = useState(false);
+  const tampilkanHasilSemantik = searchSubmitted;
+
   return (
     <>
       {/* Pencarian + filter kategori */}
-      <section id="cari-artikel" className="bg-white">
+      <section id="cari-artikel" className="relative z-30 bg-white">
         <div className="mx-auto w-full max-w-maks px-6 md:px-8">
-          <form
-            action="/tulisan-pajak"
-            method="get"
-            role="search"
-            className="flex flex-wrap items-center gap-3"
-          >
-            {kategoriAktif && (
-              <input type="hidden" name="kategori" value={kategoriAktif} />
-            )}
-            <div className="relative min-w-0 flex-1">
-              <Cari
-                aria-hidden="true"
-                className="pointer-events-none absolute top-1/2 left-[18px] h-4 w-4 -translate-y-1/2 text-teks-redup"
-              />
-              <input
-                type="search"
-                name="q"
-                defaultValue={kueri}
-                placeholder="Cari artikel perpajakan, akuntansi, atau keuangan bisnis..."
-                className="h-[52px] w-full rounded-full border-[1.5px] border-garis bg-white pr-5 pl-11 text-[0.95rem] text-navy-900 outline-none transition-[var(--transition-base)] placeholder:text-teks-redup focus:border-navy-900"
-              />
-            </div>
-            <button
-              type="submit"
-              className="h-[52px] shrink-0 cursor-pointer rounded-full bg-yellow-500 px-5 text-[0.95rem] font-bold text-navy-900 shadow-kuning transition-[var(--transition-base)] hover:-translate-y-0.5 sm:px-7"
-            >
-              Cari Artikel
-            </button>
-          </form>
+          <ArtikelSearchControl
+            initialQuery={kueri}
+            kategoriAktif={kategoriAktif}
+            onResults={setSearchResults}
+            onLoading={setSearchLoading}
+            onError={setSearchError}
+            onCategoryNote={setShowAllCategoriesNote}
+            onSearchSubmitted={setSearchSubmitted}
+          />
 
           <nav
             aria-label="Filter kategori"
@@ -121,6 +106,9 @@ export function DaftarArtikel({
               </Link>
             ))}
           </nav>
+          {showAllCategoriesNote && kategoriAktif && (
+            <p className="mt-3 text-center text-xs text-teks-redup" role="status">Pencarian semantik mencakup semua kategori; filter kategori tetap dipertahankan untuk daftar awal.</p>
+          )}
         </div>
       </section>
 
@@ -135,10 +123,42 @@ export function DaftarArtikel({
             id="daftar-artikel-judul"
             className="mb-8 font-heading text-[clamp(1.5rem,2.4vw,1.9rem)] leading-[1.2] font-bold tracking-[-0.02em] text-navy-900"
           >
-            Artikel Terbaru
+            {tampilkanHasilSemantik ? "Hasil Pencarian Artikel" : "Artikel Terbaru"}
           </h2>
 
-          {artikel.length === 0 ? (
+          {tampilkanHasilSemantik ? (
+            searchLoading ? (
+              <p className="py-10 text-center text-sm text-teks-sekunder" role="status">Sedang mencari artikel yang relevan…</p>
+            ) : searchError ? (
+              <div className="rounded-xl border border-garis bg-netral-lat px-6 py-10 text-center" role="alert">
+                <p className="font-heading font-bold text-navy-900">Pencarian belum tersedia</p>
+                <p className="mt-2 text-sm text-teks-sekunder">{searchError}</p>
+                <button type="button" onClick={() => window.location.reload()} className="mt-4 rounded-full bg-yellow-500 px-5 py-2.5 text-sm font-bold text-navy-900">Coba lagi</button>
+              </div>
+            ) : searchResults?.length ? (
+              <>
+                <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {searchResults.map((item) => (
+                    <li key={item.id}>
+                      <article className="flex h-full flex-col rounded-xl border border-garis bg-white p-5 shadow-sm">
+                        {item.kategori && <span className="mb-3 text-xs font-bold uppercase tracking-wide text-teks-redup">{item.kategori}</span>}
+                        <h3 className="font-heading text-lg font-bold leading-snug text-navy-900"><a href={item.url} className="no-underline hover:underline">{item.judul}</a></h3>
+                        <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-teks-sekunder">{item.ringkasan}</p>
+                        <a href={item.url} className="mt-4 w-fit text-sm font-bold text-navy-900 underline decoration-yellow-500 underline-offset-4">Baca Artikel</a>
+                      </article>
+                    </li>
+                  ))}
+                </ul>
+                <Link href={kategoriAktif ? `/tulisan-pajak?kategori=${encodeURIComponent(kategoriAktif)}` : "/tulisan-pajak"} className="mx-auto mt-7 block w-fit rounded-full border border-garis px-5 py-2.5 text-sm font-bold text-navy-900 no-underline transition-colors hover:bg-netral-lat">Kembali ke daftar artikel</Link>
+              </>
+            ) : (
+              <div className="rounded-xl border border-dashed border-garis bg-netral-lat px-6 py-12 text-center">
+                <p className="font-heading font-bold text-navy-900">Tidak ada artikel yang cocok</p>
+                <p className="mt-2 text-sm text-teks-sekunder">Coba kata kunci lain atau kembali ke daftar artikel.</p>
+                <Link href={kategoriAktif ? `/tulisan-pajak?kategori=${encodeURIComponent(kategoriAktif)}` : "/tulisan-pajak"} className="mt-4 inline-block rounded-full bg-yellow-500 px-5 py-2.5 text-sm font-bold text-navy-900 no-underline">Tampilkan semua artikel</Link>
+              </div>
+            )
+          ) : artikel.length === 0 ? (
             <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-garis bg-netral-lat px-6 py-16 text-center">
               <span className="grid h-14 w-14 place-items-center rounded-full bg-white text-teks-redup shadow-sm">
                 <Cari className="h-6 w-6" />

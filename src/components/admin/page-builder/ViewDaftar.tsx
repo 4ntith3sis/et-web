@@ -3,7 +3,8 @@ import Link from "next/link";
 import type { AdminViewServerProps } from "payload";
 
 import { urlPratinjauHalaman } from "@/cms/layout";
-import { DAFTAR_HALAMAN } from "@/puck/types";
+import { HALAMAN_PUCK } from "@/puck/types";
+import { KUNCI_PUCK_BERANDA } from "@/puck/editor-policy";
 
 import { stafAtauRedirect } from "./penjaga";
 import { TemplatAdmin } from "./TemplatAdmin";
@@ -11,8 +12,8 @@ import { TemplatAdmin } from "./TemplatAdmin";
 /**
  * View kustom `/admin/page-builder`: pemilih halaman.
  *
- * Hanya halaman yang terdaftar di registry (`HALAMAN_PUCK`) yang boleh
- * dibangun. Status draft/terbit dibaca langsung dari koleksi `page-layouts`.
+ * Puck editor dibatasi hanya untuk Beranda. Registry dan dokumen halaman lain
+ * tetap tersedia untuk renderer publik, tetapi tidak ditawarkan untuk editing.
  */
 export async function ViewDaftar(props: AdminViewServerProps) {
   stafAtauRedirect(props.user, "/admin/page-builder");
@@ -25,8 +26,9 @@ export async function ViewDaftar(props: AdminViewServerProps) {
     overrideAccess: true,
   });
 
+  const halaman = HALAMAN_PUCK[KUNCI_PUCK_BERANDA];
   const peta = new Map(
-    res.docs.map((doc) => {
+    res.docs.filter((doc) => (doc as { pageKey?: string }).pageKey === halaman.key).map((doc) => {
       const d = doc as { pageKey?: string; revision?: number; _status?: string };
       return [d.pageKey ?? "", d] as const;
     }),
@@ -35,13 +37,9 @@ export async function ViewDaftar(props: AdminViewServerProps) {
   /* URL Preview konkret per halaman. Halaman statis memakai rutenya sendiri;
      template dinamis (`/layanan/[slug]`, `/tulisan-pajak/[slug]`) dipetakan ke
      slug record nyata dari Payload, atau `null` bila belum ada data. */
-  const urlPratinjau = new Map(
-    await Promise.all(
-      DAFTAR_HALAMAN.map(
-        async (h) => [h.key, await urlPratinjauHalaman(h.key, h.rute)] as const,
-      ),
-    ),
-  );
+  const urlPratinjau = new Map([
+    [halaman.key, await urlPratinjauHalaman(halaman.key, halaman.rute)] as const,
+  ]);
 
   return (
     <TemplatAdmin props={props}>
@@ -71,29 +69,9 @@ export async function ViewDaftar(props: AdminViewServerProps) {
         </p>
       </header>
 
-      {(() => {
-        const grup = {
-          statis: [] as typeof DAFTAR_HALAMAN,
-          listing: [] as typeof DAFTAR_HALAMAN,
-          template: [] as typeof DAFTAR_HALAMAN,
-        };
-        for (const h of DAFTAR_HALAMAN) {
-          if (h.key.includes("template")) {
-            grup.template.push(h);
-          } else if (h.key.includes("listing")) {
-            grup.listing.push(h);
-          } else {
-            grup.statis.push(h);
-          }
-        }
-        const renderGrup = (judul: string, items: typeof DAFTAR_HALAMAN) =>
-          items.length > 0 && (
-            <div key={judul} style={{ marginBottom: 24 }}>
-              <h2 style={{ fontSize: 14, fontWeight: 700, margin: "0 0 12px", color: "#374151" }}>
-                {judul}
-              </h2>
-              <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 12 }}>
-                {items.map((halaman) => {
+      <div style={{ marginBottom: 24 }}>
+        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 12 }}>
+          {[halaman].map((halaman) => {
                   const dok = peta.get(halaman.key);
                   const jumlah = dok?.revision ?? 0;
                   const terbit = dok?._status === "published";
@@ -189,18 +167,9 @@ export async function ViewDaftar(props: AdminViewServerProps) {
                       </div>
                     </li>
                   );
-                })}
-              </ul>
-            </div>
-          );
-        return (
-          <>
-            {renderGrup("Halaman Statis", grup.statis)}
-            {renderGrup("Halaman Listing", grup.listing)}
-            {renderGrup("Template Detail", grup.template)}
-          </>
-        );
-      })()}
+          })}
+        </ul>
+      </div>
 
       <p style={{ marginTop: 24 }}>
         <Link href="/admin" style={{ color: "#2563eb", fontSize: 14 }}>
