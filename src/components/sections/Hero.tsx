@@ -7,7 +7,7 @@ import { DEFAULT_HERO } from "@/puck/default-props";
 import type { PropsHero } from "@/puck/types";
 
 const FOTO_HERO =
-  "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1600&q=80";
+  "/images/external/photo-1531482615713-2afd69097998.webp";
 
 /**
  * Hero v1 EasyTax: latar navy penuh, dua kolom (55/45). Kolom kiri berisi
@@ -54,7 +54,7 @@ export function Hero(props: Partial<PropsHero> = {}) {
           </p>
 
           <div className="mb-[30px] flex flex-wrap gap-4">
-            {!ctaHref || ctaHref.includes("mauorder") || ctaHref.startsWith("/api/konsultasi/whatsapp") ? (
+            {!ctaHref || ctaHref.includes("mauorder") || ctaHref.startsWith("/api/konsultasi/whatsapp") || /konsultasi|whatsapp/i.test(ctaLabel) ? (
               <ConsultationButton
                 sumber="hero"
                 ukuran="sedang"

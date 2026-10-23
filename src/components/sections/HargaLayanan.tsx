@@ -1,8 +1,7 @@
 import { Centang } from "@/components/ikon";
-import { Tombol } from "@/components/ui/Tombol";
 import { ConsultationButton } from "@/features/whatsapp/components/ConsultationButton";
+import { pesanKonsultasiPaket } from "@/features/whatsapp/config";
 import type { PaketLayanan } from "@/data/layanan-detail";
-import { situs } from "@/data/situs";
 import { formatHargaRupiah, formatSatuan } from "@/lib/format-harga";
 import type { PropsHargaLayanan } from "@/puck/types";
 
@@ -13,12 +12,10 @@ function KartuPaket({
   paket,
   labelKeunggulan,
   labelTombol,
-  tombolHref,
 }: {
   paket: PaketLayanan;
   labelKeunggulan: string;
   labelTombol: string;
-  tombolHref: string;
 }) {
   const hargaTampil = formatHargaRupiah(paket.harga);
   const unitTampil = formatSatuan(paket.satuan);
@@ -65,7 +62,8 @@ function KartuPaket({
 
       <ConsultationButton
         sumber="paket-layanan"
-        pesan={`Halo EasyTax, saya ingin konsultasi mengenai Paket ${paket.nama}.`}
+        konteks="paket"
+        pesan={pesanKonsultasiPaket(paket.nama, paket.harga, paket.satuan)}
         ukuran="sedang"
         className="mt-auto w-fit rounded-md py-[13px] px-7 text-[0.95rem]"
       >
@@ -98,11 +96,6 @@ export function HargaLayanan({
   const deskripsi = desain?.deskripsi ?? "Pilih paket yang sesuai kebutuhan bisnis Anda.";
   const labelKeunggulan = desain?.labelKeunggulan ?? "Keunggulan";
   const labelTombol = desain?.labelTombol ?? "Konsultasi";
-  const tombolHrefAwal = desain?.tombolHref || situs.whatsappUrl;
-  const tombolHref =
-    !tombolHrefAwal || tombolHrefAwal.includes("mauorder")
-      ? "/api/konsultasi/whatsapp?sumber=paket-layanan"
-      : tombolHrefAwal;
   const tengah = (desain?.perataan ?? "tengah") === "tengah";
 
   return (
@@ -143,7 +136,6 @@ export function HargaLayanan({
                 paket={p}
                 labelKeunggulan={labelKeunggulan}
                 labelTombol={labelTombol}
-                tombolHref={tombolHref}
               />
             </li>
           ))}

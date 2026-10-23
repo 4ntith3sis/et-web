@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { connection } from "next/server";
 
 import { ArtikelDetailHero } from "@/components/sections/ArtikelDetailHero";
 import { ArtikelTerkait } from "@/components/sections/ArtikelTerkait";
@@ -10,12 +11,6 @@ import { ambilArtikel, ambilArtikelDetail } from "@/cms/konten";
 import { ekstrakHeading, type BlokIsi } from "@/lib/artikel/toc";
 
 type Params = Promise<{ slug: string }>;
-
-/** Prerender semua slug artikel dari CMS (fallback ke data statis). */
-export async function generateStaticParams() {
-  const daftar = await ambilArtikel();
-  return daftar.map((a) => ({ slug: a.slug }));
-}
 
 export async function generateMetadata({
   params,
@@ -27,11 +22,13 @@ export async function generateMetadata({
   const artikel = (await ambilArtikel()).find(
     (a) => a.slug.toLowerCase() === cleanSlug,
   );
-  if (!artikel) return { title: "Artikel Tidak Ditemukan | EasyTax" };
+  if (!artikel) notFound();
 
+  const canonical = `/tulisan-pajak/${encodeURIComponent(artikel.slug)}`;
   return {
     title: `${artikel.judul} | EasyTax`,
     description: artikel.ringkasan,
+    alternates: { canonical },
     openGraph: {
       title: artikel.judul,
       description: artikel.ringkasan,
@@ -39,14 +36,21 @@ export async function generateMetadata({
       type: "article",
       locale: "id_ID",
       siteName: "EasyTax",
+      url: canonical,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: artikel.judul,
+      description: artikel.ringkasan,
+      images: artikel.gambar ? [artikel.gambar] : undefined,
     },
   };
 }
 
 /**
- * `params` hanya boleh dibaca di dalam <Suspense> (Next.js dengan
- * cacheComponents), jadi halaman membungkus seluruh isinya dengan
- * fallback ringan.
+ * `params` dibaca di dalam <Suspense> agar shell halaman tetap dapat
+ * di-stream (cacheComponents). Status 404 untuk slug yang tidak ada ditangani
+ * lebih awal oleh proxy, sebelum shell dikirim.
  */
 export default function HalamanArtikel({ params }: { params: Params }) {
   return (
@@ -59,6 +63,7 @@ export default function HalamanArtikel({ params }: { params: Params }) {
 }
 
 async function IsiArtikelHalaman({ params }: { params: Params }) {
+  await connection();
   const { slug } = await params;
   const cleanSlug = slug.toLowerCase();
   const [artikelBeranda, detail] = await Promise.all([

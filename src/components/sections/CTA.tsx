@@ -1,9 +1,9 @@
 import { Email, Obrolan } from "@/components/ikon";
 import { Tombol } from "@/components/ui/Tombol";
 import { ConsultationButton } from "@/features/whatsapp/components/ConsultationButton";
-import { situs } from "@/data/situs";
 import { DEFAULT_CTA } from "@/puck/default-props";
 import type { PropsCta } from "@/puck/types";
+import { situs } from "@/data/situs";
 
 /**
  * Banner CTA penutup di atas footer: panel navy membulat (rounded-xl) di
@@ -40,7 +40,7 @@ export function CTA(props: Partial<PropsCta> = {}) {
           </p>
 
           <div className="relative mt-9 flex flex-wrap items-center justify-center gap-4.5">
-            {!ctaHref || ctaHref.includes("mauorder") || ctaHref.startsWith("/api/konsultasi/whatsapp") ? (
+            {!ctaHref || ctaHref.includes("mauorder") || ctaHref.startsWith("/api/konsultasi/whatsapp") || /konsultasi|whatsapp/i.test(ctaLabel) ? (
               <ConsultationButton
                 sumber="cta"
                 ukuran="sedang"

@@ -1,6 +1,6 @@
 import { Centang, Pengguna } from "@/components/ikon";
 import { HeroPanel } from "@/components/ui/HeroPanel";
-import { situs } from "@/data/situs";
+import { tautanKonsultasiWhatsApp } from "@/features/whatsapp/config";
 
 /**
  * Hero halaman /tentang-kami — memakai panel hero yang sama dengan
@@ -21,7 +21,7 @@ export function TentangHero() {
       deskripsi="EasyTax adalah jasa konsultan pajak dan akuntansi yang membantu UMKM dan perusahaan menata kewajiban pajaknya tanpa harus memahami semua detailnya."
       tombolUtama={{
         label: "Konsultasi Gratis",
-        href: "/api/konsultasi/whatsapp?sumber=tentang-hero",
+        href: tautanKonsultasiWhatsApp(undefined, "tentang-hero"),
         eksternal: true,
       }}
       tombolSekunder={{ label: "Lihat Tim", href: "#tim" }}
@@ -30,7 +30,7 @@ export function TentangHero() {
         "Pembukuan Sesuai Standar Akuntansi",
       ]}
       gambar={{
-        src: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1000&q=80",
+        src: "/images/external/photo-1521737604893-d14cc237f11d.webp",
         alt: "Tim konsultan pajak EasyTax bersama klien",
       }}
       kartu={[

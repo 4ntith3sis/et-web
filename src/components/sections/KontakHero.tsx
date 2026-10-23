@@ -8,6 +8,7 @@ import {
   WhatsApp,
 } from "@/components/ikon";
 import { situs } from "@/data/situs";
+import { buatTautanWA, normalisasiNomorWA, validasiNomorWA } from "@/features/whatsapp/utils";
 
 /* Teks kartu diambil dari easytax-demo (v1); desain kartu berbeda:
    tampil di atas latar navy, kartu WhatsApp ditonjolkan warna kuning brand. */
@@ -15,10 +16,10 @@ const kartuKontak = [
   {
     ikon: WhatsApp,
     eyebrow: "WhatsApp · Tercepat",
-    nilai: "0811-1920-0080",
+    nilai: "WhatsApp utama",
     teks: "Respons rata-rata kurang dari 5 menit. Tersedia Senin–Jumat, 09:00–17:00 WIB.",
     aksi: "Mulai chat WhatsApp",
-    href: "/api/konsultasi/whatsapp?sumber=kontak-hero",
+    href: "",
     eksternal: true,
     sorot: true,
   },
@@ -35,16 +36,26 @@ const kartuKontak = [
   {
     ikon: Telepon,
     eyebrow: "Telepon · Kantor",
-    nilai: "(021) 2940-0153",
+    nilai: "",
     teks: "Hubungi kantor pusat kami. Tim operasional konsultan siap melayani pada jam kerja operasional.",
     aksi: "Telepon kami",
-    href: "tel:02129400153",
+    href: "",
     eksternal: false,
     sorot: false,
   },
 ];
 
-export function KontakHero() {
+export function KontakHero({ nomorWhatsAppUtama, teleponKantor }: { nomorWhatsAppUtama?: string | null; teleponKantor?: string | null }) {
+  const nomorBersih = normalisasiNomorWA(nomorWhatsAppUtama);
+  const nomorValid = validasiNomorWA(nomorBersih);
+  const nomorTampilan = nomorWhatsAppUtama?.trim() || "";
+  const telepon = teleponKantor?.trim() || "";
+  const teleponHref = telepon.replace(/[^0-9+]/g, "");
+  const kartu = kartuKontak.map((item, index) => {
+    if (index === 0) return { ...item, nilai: nomorValid ? nomorTampilan : "Belum tersedia", href: nomorValid ? buatTautanWA(nomorBersih) : "" };
+    if (index === 2) return { ...item, nilai: telepon || "Belum tersedia", href: teleponHref ? `tel:${teleponHref}` : "" };
+    return item;
+  });
   return (
     <section className="bg-navy-900 px-6 pt-[clamp(48px,6vw,60px)] pb-[clamp(48px,6.4vw,72px)] text-white md:px-8">
       <div className="mx-auto w-full max-w-maks">
@@ -80,7 +91,7 @@ export function KontakHero() {
         </div>
 
         <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
-          {kartuKontak.map((k) => (
+          {kartu.map((k) => (
             <article
               key={k.eyebrow}
               className={
@@ -106,18 +117,14 @@ export function KontakHero() {
                 {k.teks}
               </p>
 
-              <a
-                href={k.href}
-                {...(k.eksternal
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
-                className="group/action mt-auto flex items-center justify-between gap-3 border-t border-navy-900/15 pt-4 font-bold text-navy-900 no-underline"
-              >
-                <span className="text-[0.92rem]">{k.aksi}</span>
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-navy-900 text-yellow-500 transition-[var(--transition-base)] group-hover/action:translate-x-1">
-                  <PanahKanan className="h-4 w-4" />
-                </span>
-              </a>
+              {k.href ? (
+                <a href={k.href} {...(k.eksternal ? { target: "_blank", rel: "noopener noreferrer" } : {})} className="group/action mt-auto flex items-center justify-between gap-3 border-t border-navy-900/15 pt-4 font-bold text-navy-900 no-underline">
+                  <span className="text-[0.92rem]">{k.aksi}</span>
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-navy-900 text-yellow-500 transition-[var(--transition-base)] group-hover/action:translate-x-1"><PanahKanan className="h-4 w-4" /></span>
+                </a>
+              ) : (
+                <span aria-disabled="true" className="mt-auto flex items-center gap-3 border-t border-navy-900/15 pt-4 font-semibold text-navy-900/60">WhatsApp belum dikonfigurasi</span>
+              )}
             </article>
           ))}
         </div>

@@ -7,7 +7,9 @@ import { useState } from "react";
 import { Cari, Jam, PanahKanan } from "@/components/ikon";
 import { ArtikelSearchControl } from "@/components/sections/ArtikelSearchControl";
 import { ambilKategori, type KategoriArtikel } from "@/lib/artikel/kategori";
-import type { ArtikelBeranda } from "@/data/artikel";
+import { artikelBeranda, type ArtikelBeranda } from "@/data/artikel";
+
+const GAMBAR_ARTIKEL_FALLBACK = new Map<string, string>(artikelBeranda.map((item) => [item.slug, item.gambar]));
 
 /**
  * Daftar artikel untuk halaman /tulisan-pajak (gaya editorial).
@@ -52,12 +54,13 @@ export function DaftarArtikel({
   totalDocs,
   kueri = "",
 }: Prop) {
-  type HasilSemantik = { id: number; judul: string; slug: string; ringkasan: string; url: string; relevansi: number; kategori?: string };
+  type HasilSemantik = { id: number; judul: string; slug: string; ringkasan: string; url: string; relevansi: number; kategori?: string; gambar?: string };
   const [searchResults, setSearchResults] = useState<HasilSemantik[] | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [showAllCategoriesNote, setShowAllCategoriesNote] = useState(false);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
+  const [searchMode, setSearchMode] = useState<"semantic" | "keyword">("semantic");
   const tampilkanHasilSemantik = searchSubmitted;
 
   return (
@@ -73,6 +76,7 @@ export function DaftarArtikel({
             onError={setSearchError}
             onCategoryNote={setShowAllCategoriesNote}
             onSearchSubmitted={setSearchSubmitted}
+            onSearchMode={setSearchMode}
           />
 
           <nav
@@ -123,7 +127,7 @@ export function DaftarArtikel({
             id="daftar-artikel-judul"
             className="mb-8 font-heading text-[clamp(1.5rem,2.4vw,1.9rem)] leading-[1.2] font-bold tracking-[-0.02em] text-navy-900"
           >
-            {tampilkanHasilSemantik ? "Hasil Pencarian Artikel" : "Artikel Terbaru"}
+            {tampilkanHasilSemantik ? (searchMode === "semantic" ? "Hasil Pencarian Semantik" : "Hasil Pencarian Kata Kunci") : "Artikel Terbaru"}
           </h2>
 
           {tampilkanHasilSemantik ? (
@@ -140,11 +144,22 @@ export function DaftarArtikel({
                 <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {searchResults.map((item) => (
                     <li key={item.id}>
-                      <article className="flex h-full flex-col rounded-xl border border-garis bg-white p-5 shadow-sm">
-                        {item.kategori && <span className="mb-3 text-xs font-bold uppercase tracking-wide text-teks-redup">{item.kategori}</span>}
-                        <h3 className="font-heading text-lg font-bold leading-snug text-navy-900"><a href={item.url} className="no-underline hover:underline">{item.judul}</a></h3>
-                        <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-teks-sekunder">{item.ringkasan}</p>
-                        <a href={item.url} className="mt-4 w-fit text-sm font-bold text-navy-900 underline decoration-yellow-500 underline-offset-4">Baca Artikel</a>
+                        <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-garis bg-white shadow-sm transition-[var(--transition-base)] hover:-translate-y-2 hover:shadow-xl">
+                          <Link href={item.url} className="relative block aspect-video shrink-0 overflow-hidden bg-navy-900" aria-label={`Baca ${item.judul}`}>
+                            <Image
+                              src={item.gambar || GAMBAR_ARTIKEL_FALLBACK.get(item.slug) || "/images/placeholder-artikel.svg"}
+                              alt={item.judul}
+                              fill
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                              className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                            {item.kategori && <span className="absolute top-4 left-4 z-2 rounded-full bg-yellow-500 px-3 py-1 text-[0.75rem] font-bold tracking-[0.03em] text-navy-900 uppercase shadow-sm">{item.kategori}</span>}
+                          </Link>
+                          <div className="flex flex-1 flex-col p-[18px]">
+                            <h3 className="mb-2 line-clamp-2 font-heading text-[1.22rem] leading-[1.4] font-bold text-navy-900"><Link href={item.url} className="no-underline transition-colors hover:underline">{item.judul}</Link></h3>
+                            <p className="mb-4 line-clamp-2 flex-1 text-[0.9rem] leading-[1.6] text-teks-sekunder">{item.ringkasan}</p>
+                            <Link href={item.url} className="inline-flex w-fit items-center gap-2 py-1 text-[0.88rem] font-bold text-navy-900 no-underline transition-[var(--transition-base)] hover:gap-3">Baca Selengkapnya<PanahKanan className="h-3.5 w-3.5" /></Link>
+                          </div>
                       </article>
                     </li>
                   ))}

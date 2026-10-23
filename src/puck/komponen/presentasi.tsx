@@ -1,8 +1,10 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 
 import { Ikon } from "@/components/ui/Ikon";
 import { cn } from "@/lib/cn";
+import { mediaUrlRelatif } from "@/lib/media-url";
 
 import type {
   ItemDaftar,
@@ -50,6 +52,11 @@ const WARNA: Record<WarnaTeksKomponen, string> = {
   sekunder: "var(--color-teks-sekunder)",
   redup: "var(--color-teks-redup)",
 };
+
+/** True untuk path internal yang aman dinavigasi lewat next/link. */
+function tautanInternal(href: string | undefined): href is string {
+  return Boolean(href && href.startsWith("/") && !href.startsWith("//"));
+}
 
 const LATAR: Record<NadaLatarKomponen, string> = {
   putih: "#ffffff",
@@ -256,7 +263,8 @@ function rasioGambar(media: MediaTerpilih, rasio: PropsImage["rasio"]): string {
 }
 
 export function Gambar({ media, rasio, pasFit, radius, lebarMaks, rata, keterangan }: PropsImage) {
-  const adaGambar = Boolean(media?.url);
+  const src = mediaUrlRelatif(media?.url);
+  const adaGambar = Boolean(src);
   return (
     <figure style={{ ...gayaRata(rata), maxWidth: lebarMaks > 0 ? px(lebarMaks, 80, 4000, 720) : undefined, margin: 0 }}>
       <div
@@ -270,7 +278,7 @@ export function Gambar({ media, rasio, pasFit, radius, lebarMaks, rata, keterang
       >
         {adaGambar ? (
           <Image
-            src={media.url}
+            src={src!}
             alt={media.alt || ""}
             fill
             sizes="(max-width: 768px) 100vw, 720px"
@@ -412,14 +420,25 @@ export function Button({ label, href, varian, ukuran, rata, tabBaru }: PropsButt
     KELAS_UKURAN[ukuran] ?? KELAS_UKURAN.sedang,
   );
   const isi = href ? (
-    <a
-      href={href}
-      className={kelas}
-      target={tabBaru ? "_blank" : undefined}
-      rel={tabBaru ? "noopener noreferrer" : undefined}
-    >
-      {label}
-    </a>
+    tautanInternal(href) ? (
+      <Link
+        href={href}
+        className={kelas}
+        target={tabBaru ? "_blank" : undefined}
+        rel={tabBaru ? "noopener noreferrer" : undefined}
+      >
+        {label}
+      </Link>
+    ) : (
+      <a
+        href={href}
+        className={kelas}
+        target={tabBaru ? "_blank" : undefined}
+        rel={tabBaru ? "noopener noreferrer" : undefined}
+      >
+        {label}
+      </a>
+    )
   ) : (
     <span className={kelas}>{label}</span>
   );
@@ -451,9 +470,13 @@ export function ButtonGroup({ tombol, gap, rata }: PropsButtonGroup) {
           )}
         >
           {t.href ? (
-            <a href={t.href} rel="noopener noreferrer">
-              {t.label}
-            </a>
+            tautanInternal(t.href) ? (
+              <Link href={t.href}>{t.label}</Link>
+            ) : (
+              <a href={t.href} rel="noopener noreferrer">
+                {t.label}
+              </a>
+            )
           ) : (
             t.label
           )}
@@ -464,18 +487,29 @@ export function ButtonGroup({ tombol, gap, rata }: PropsButtonGroup) {
 }
 
 export function Tautan({ teks, href, eksternal, warna, ukuran }: PropsLink) {
+  const hrefAman = href || "#";
+  const gaya = {
+    color: warnaTeks(warna) === "inherit" ? "var(--color-brand-navy)" : warnaTeks(warna),
+    fontSize: px(ukuran, 10, 40, 16),
+    fontWeight: 700,
+    textDecoration: "underline",
+    textUnderlineOffset: 3,
+  } satisfies CSSProperties;
+
+  if (!eksternal && tautanInternal(hrefAman)) {
+    return (
+      <Link href={hrefAman} style={gaya}>
+        {teks}
+      </Link>
+    );
+  }
+
   return (
     <a
-      href={href || "#"}
+      href={hrefAman}
       target={eksternal ? "_blank" : undefined}
       rel={eksternal ? "noopener noreferrer" : undefined}
-      style={{
-        color: warnaTeks(warna) === "inherit" ? "var(--color-brand-navy)" : warnaTeks(warna),
-        fontSize: px(ukuran, 10, 40, 16),
-        fontWeight: 700,
-        textDecoration: "underline",
-        textUnderlineOffset: 3,
-      }}
+      style={gaya}
     >
       {teks}
     </a>
@@ -504,6 +538,7 @@ export function Card({
   rata,
 }: PropsCard) {
   const gelap = latar === "navy";
+  const src = mediaUrlRelatif(media?.url);
   return (
     <div
       style={{
@@ -518,9 +553,9 @@ export function Card({
         gap: 12,
       }}
     >
-      {media?.url ? (
+      {src ? (
         <div style={{ position: "relative", aspectRatio: "16 / 9", borderRadius: 12, overflow: "hidden" }}>
-          <Image src={media.url} alt={media.alt || ""} fill sizes="360px" style={{ objectFit: "cover" }} unoptimized />
+          <Image src={src} alt={media?.alt || ""} fill sizes="360px" style={{ objectFit: "cover" }} unoptimized />
         </div>
       ) : null}
       {ikon ? (

@@ -166,9 +166,9 @@ Next.js untuk kasus ini). Karena itu dipakai `instant = false`.
 
 ## Status publish `template-layanan-detail` & `template-artikel-detail` belum sinkron
 
-**Status:** TERBUKA — menunggu keputusan editorial (tidak diperbaiki sepihak)
-**Terakhir diverifikasi:** 21 Okt 2026 (Payload 3.91.0, PostgreSQL lokal)
-**Tipe:** Ketidaksesuaian status (bukan kerusakan fungsional)
+**Status:** TERBUKA — publish sudah bisa, tetapi template belum dirender publik
+**Terakhir diverifikasi:** 22 Okt 2026 (Payload 3.91.0, PostgreSQL lokal)
+**Tipe:** Ketidaksesuaian status + cakupan render
 
 ### Gejala
 
@@ -191,11 +191,17 @@ Pembaruan status terjadi melalui jalur di luar tombol **Publish** Page Builder
 dokumen tidak ikut berubah status menjadi `published`. Payload menyimpan status
 publikasi pada baris utama dan pada version row secara terpisah.
 
-### Larutan (1 klik)
+### Larutan
 
 Buka `Admin → Page Builder → <page key>` lalu klik **Publish**. Tombol ini
 memakai `payload.update({ draft: false })` yang menulis baris utama sekaligus
-version row `published` (terverifikasi pada `tentang-kami`).
+version row `published`; alur simpan-draft-lalu-publish sudah diperbaiki
+(terverifikasi pada dokumen sementara dan Beranda, 22 Okt 2026).
+
+Meski status publish sudah benar, `/layanan/[slug]` dan
+`/tulisan-pajak/[slug]` **masih memakai komponen native**, bukan
+`<PuckRender/>`. Jadi layout template yang diterbitkan belum mengubah halaman
+publik sampai rute tersebut di-wire ke Puck pada pekerjaan terpisah.
 
 ### Catatan editorial
 

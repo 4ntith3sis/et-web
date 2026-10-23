@@ -21,7 +21,7 @@ export async function berkasArtifactHilang(
   const hilang: string[] = [];
   for (const berkas of BERKAS_WAJIB) {
     try {
-      await access(join(akar, berkas));
+      await access(join(/*turbopackIgnore: true*/ akar, berkas));
     } catch {
       hilang.push(berkas);
     }
@@ -30,7 +30,7 @@ export async function berkasArtifactHilang(
   let adaTokenizer = false;
   for (const berkas of BERKAS_TOKENIZER) {
     try {
-      await access(join(akar, berkas));
+      await access(join(/*turbopackIgnore: true*/ akar, berkas));
       adaTokenizer = true;
       break;
     } catch {

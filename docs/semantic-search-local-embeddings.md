@@ -211,6 +211,73 @@ model atau database nyata; bukti nyata ada pada daftar di atas.
   flag aktif dan cache tidak tersedia.
 - Model belum dipin ke revisi immutable dan belum memiliki manifest SHA-256.
   Ini perlu disiapkan sebelum deploy produksi.
+- Sumber resmi, commit/revisi, checksum, dan lisensi model belum disetujui atau
+  dicatat dalam dokumentasi proyek. Jangan mengambil artefak hanya berdasarkan
+  nama model. Pemilik proyek harus menyetujui sumber/repository, commit SHA
+  immutable, syarat lisensi model dan tokenizer, serta distribusi internal
+  sebelum cache disediakan.
+
+### Penyediaan cache terkontrol
+
+Setelah persetujuan di atas, ambil snapshot tepat pada commit SHA yang disetujui
+melalui proses terpisah yang berwenang. Jangan mengambil `main` bergerak atau
+mengaktifkan unduhan runtime. Simpan seluruh file snapshot model dan tokenizer
+yang diperlukan—bukan hanya empat file pemeriksaan minimum di atas—pada struktur:
+
+```text
+<cache-root>/Horizon-Labs/multilingual-embedding-small/
+```
+
+Transformers.js 4.3.1 memilih file ONNX berdasarkan `config.json`, dtype `q8`,
+dan konfigurasi `transformers.js_config`. Periksa konfigurasi snapshot untuk
+nama file ONNX aktual, `use_external_data_format`, dan semua chunk data eksternal
+jika dikonfigurasi. Pertahankan file tokenizer/config yang dirujuk oleh
+`tokenizer_config.json`; tokenizer JSON mungkin memuat vocabulary dan aturan
+pre/post-processing di dalam satu file. Jika tokenizer menggunakan file
+terpisah atau konfigurasi merujuk aset lain, sertakan seluruhnya. Tes provider
+nyata tetap menjadi pemeriksaan akhir kelengkapan.
+
+Buat manifest dari semua file reguler dalam direktori model, dengan jalur relatif
+terhadap direktori model, dan simpan manifest di luar direktori tersebut agar
+manifest tidak menghitung dirinya sendiri. Contoh setelah snapshot sudah berada
+di cache yang disetujui (tidak mengunduhnya):
+
+```sh
+MODEL_DIR="<cache-root>/Horizon-Labs/multilingual-embedding-small"
+(cd "$MODEL_DIR" && find . -type f -print0 | sort -z | xargs -0 shasum -a 256) \
+  > "<approved-manifest-location>/multilingual-embedding-small.sha256"
+```
+
+Catat commit SHA, sumber, lisensi, tanggal penerimaan, dan checksum manifest
+dalam catatan rilis internal. Setelah cache dipasang, verifikasi dari direktori
+model sebelum tes inference:
+
+```sh
+cd "<cache-root>/Horizon-Labs/multilingual-embedding-small"
+shasum -a 256 -c "<approved-manifest-location>/multilingual-embedding-small.sha256"
+```
+
+Semua entri harus `OK`; pastikan juga pemeriksaan file wajib provider lengkap.
+Gunakan mount baca-saja pada lokasi production yang sudah ditetapkan. Contoh
+perintah uji setelah skrip tersedia pada host dan cache telah disetujui serta
+diverifikasi (ganti kedua placeholder dengan path absolut):
+
+```sh
+docker run --rm --network none \
+  --mount type=bind,src="<cache-root>",dst=/app/model-cache,readonly \
+  --mount type=bind,src="<absolute-path>/scripts/rag-inference-smoke.mjs",dst=/app/scripts/rag-inference-smoke.mjs,readonly \
+  -e RAG_EMBEDDING_ALLOW_DOWNLOAD=false \
+  easytax-remediation:local \
+  node --import tsx /app/scripts/rag-inference-smoke.mjs
+```
+
+Perintah tersebut memakai image ARM64 yang telah diuji, digest
+`sha256:494ebd1fea7bc46a1178ba3a02a179a01f1b4be2e8ec7adf42b1151ea99e1d8f`;
+verifikasi kembali digest tag image sebelum dipakai. Skrip smoke test harus
+tersedia melalui mount seperti di atas (image tercatat dibangun sebelum skrip
+ditambahkan). Perintah tidak memasang kredensial database, menonaktifkan
+jaringan, dan memasang cache serta skrip baca-saja. Jangan aktifkan RAG untuk
+trafik aplikasi atau menjalankan reindex sebagai bagian dari tes inference ini.
 - `allowedDevOrigins: ["127.0.0.1"]` ditambahkan hanya agar HMR dan hidrasi UI
   berjalan saat diuji lewat loopback. Opsi ini tidak memengaruhi produksi.
 - Semantic search mencakup semua kategori. Filter kategori pada halaman tetap

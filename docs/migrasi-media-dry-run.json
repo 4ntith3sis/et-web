@@ -1,0 +1,1501 @@
+{
+  "ringkasan": {
+    "dihasilkan": "2026-10-23T03:19:21.229Z",
+    "sumberApi": "http://localhost:3004",
+    "sebelum": {
+      "artikel": 12,
+      "layanan": 4,
+      "tim": 4,
+      "mitra": 1,
+      "media": 1
+    },
+    "target": {
+      "mediaTotal": 44,
+      "mediaBaru": 43,
+      "mediaCmsSaja": 40,
+      "mediaBaruCmsSaja": 39,
+      "relasiTotal": 41,
+      "relasiBaru": 40,
+      "relasiAda": 1,
+      "mitraTotal": 21,
+      "mitraBaru": 20
+    },
+    "sesudah": {
+      "artikel": 12,
+      "layanan": 4,
+      "tim": 4,
+      "mitra": 21,
+      "media": 44
+    },
+    "perKoleksi": {
+      "artikel": {
+        "relasiTarget": 12,
+        "relasiSudahAda": 0,
+        "relasiBaru": 12
+      },
+      "layanan": {
+        "relasiTarget": 4,
+        "relasiSudahAda": 0,
+        "relasiBaru": 4
+      },
+      "tim": {
+        "relasiTarget": 4,
+        "relasiSudahAda": 0,
+        "relasiBaru": 4
+      },
+      "mitra": {
+        "relasiTarget": 21,
+        "relasiSudahAda": 1,
+        "relasiBaru": 20,
+        "recordBaru": 20
+      }
+    },
+    "perbedaan": [
+      "44 media = 23 foto unik + 21 logo. Dari jumlah itu 1 media sudah ada (akiha.webp), sehingga media baru = 43, bukan 44.",
+      "41 relasi = 20 relasi foto CMS (12 artikel + 4 layanan + 4 tim) + 21 relasi logo mitra. Satu relasi logo sudah terisi (akiha), sehingga relasi baru = 40.",
+      "20 record mitra baru = target 21 mitra - 1 record akiha yang sudah ada.",
+      "12 relasi artikel memakai 11 foto unik karena photo-1521791136064-7986c2920216 dipakai dua artikel.",
+      "Dari 23 foto, 4 hanya dipakai komponen statis (Hero beranda, LayananHero, TentangHero, Kontak) dan tidak punya relasi CMS.",
+      "Jika migrasi dibatasi hanya pada aset yang punya relasi CMS, target media menjadi 40 (19 foto unik + 21 logo), bukan 44.",
+      "Logo: 1 sudah berupa akiha.webp; 20 logo baru tetap JPG. Upload JPG saat ini akan dikonversi hook ke WebP, jadi apply memerlukan bypass eksplisit agar kebijakan JPG logo tidak berubah.",
+      "Record mitra akiha memiliki urutan 1. Record baru direncanakan urutan 2-21 agar tidak menimpa urutan akiha; akibatnya akiha tampil lebih awal sampai urutan diperbarui (perubahan urutan tidak termasuk 20 record baru)."
+    ]
+  },
+  "media": [
+    {
+      "filename": "migrasi-photo-1434626881859-194d67b2b86f.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 1000,
+      "height": 664,
+      "bytes": 84058,
+      "source": "public/images/external/photo-1434626881859-194d67b2b86f.jpg",
+      "siapUpload": "public/images/external/photo-1434626881859-194d67b2b86f.webp",
+      "target": "public/images/external/photo-1434626881859-194d67b2b86f.webp",
+      "sha256": "e05ae16543359eb4cf90edeaf96475d40438267c0220ffd259e1fad94268dc46",
+      "status": "create",
+      "linkedTo": [
+        "layanan:laporan-spt (gambar)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1450101499163-c8848c66ca85.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 600,
+      "height": 400,
+      "bytes": 15424,
+      "source": "public/images/external/photo-1450101499163-c8848c66ca85.jpg",
+      "siapUpload": "public/images/external/photo-1450101499163-c8848c66ca85.webp",
+      "target": "public/images/external/photo-1450101499163-c8848c66ca85.webp",
+      "sha256": "9dcb1befc31e355b0204f833e4481de675b4e19561a1fcdb885a60d237efc2b5",
+      "status": "create",
+      "linkedTo": [
+        "artikel:transfer-pricing-dokumentasi (sampul)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1454165804606-c3d57bc86b40.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 1000,
+      "height": 667,
+      "bytes": 61926,
+      "source": "public/images/external/photo-1454165804606-c3d57bc86b40.jpg",
+      "siapUpload": "public/images/external/photo-1454165804606-c3d57bc86b40.webp",
+      "target": "public/images/external/photo-1454165804606-c3d57bc86b40.webp",
+      "sha256": "40c4ac0359ef9d27a593adbf398459644a9bb8f5326c1b4ee36afd282df81835",
+      "status": "create",
+      "linkedTo": [
+        "layanan:laporan-perpajakan-keuangan (gambar)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1460925895917-afdab827c52f.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 600,
+      "height": 427,
+      "bytes": 28452,
+      "source": "public/images/external/photo-1460925895917-afdab827c52f.jpg",
+      "siapUpload": "public/images/external/photo-1460925895917-afdab827c52f.webp",
+      "target": "public/images/external/photo-1460925895917-afdab827c52f.webp",
+      "sha256": "af73df60c5147d8ffe8dca5c172794754eb83e8da47cb27d7bf78f5db541d671",
+      "status": "create",
+      "linkedTo": [
+        "artikel:e-faktur-4-0 (sampul)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1472099645785-5658abf4ff4e.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 600,
+      "height": 400,
+      "bytes": 9860,
+      "source": "public/images/external/photo-1472099645785-5658abf4ff4e.jpg",
+      "siapUpload": "public/images/external/photo-1472099645785-5658abf4ff4e.webp",
+      "target": "public/images/external/photo-1472099645785-5658abf4ff4e.webp",
+      "sha256": "fbea5e3c118f018c62cc387df147b88ceb4f3b5e7b521d2cefafd7ee6a652d15",
+      "status": "create",
+      "linkedTo": [
+        "tim:Akmal Abdul Arik (foto)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1486406146926-c627a92ad1ab.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 1000,
+      "height": 667,
+      "bytes": 140336,
+      "source": "public/images/external/photo-1486406146926-c627a92ad1ab.jpg",
+      "siapUpload": "public/images/external/photo-1486406146926-c627a92ad1ab.webp",
+      "target": "public/images/external/photo-1486406146926-c627a92ad1ab.webp",
+      "sha256": "69340b044527b8785b743da39f29b00c772432af431447c654b54e661804f3f6",
+      "status": "create",
+      "linkedTo": [],
+      "catatan": [
+        "Tidak terhubung ke koleksi CMS; hanya dipakai komponen statis (Opsional jika migrasi dibatasi ke aset CMS)."
+      ]
+    },
+    {
+      "filename": "migrasi-photo-1494790108377-be9c29b29330.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 600,
+      "height": 900,
+      "bytes": 27370,
+      "source": "public/images/external/photo-1494790108377-be9c29b29330.jpg",
+      "siapUpload": "public/images/external/photo-1494790108377-be9c29b29330.webp",
+      "target": "public/images/external/photo-1494790108377-be9c29b29330.webp",
+      "sha256": "5bed2ebc008f78de7199bd6d1b9b73a66af75e9b6e3ee94b9cff8785a3cd1027",
+      "status": "create",
+      "linkedTo": [
+        "tim:Risa Rizki Sharon (foto)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1504868584819-f8e8b4b6d7e3.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 600,
+      "height": 397,
+      "bytes": 18992,
+      "source": "public/images/external/photo-1504868584819-f8e8b4b6d7e3.jpg",
+      "siapUpload": "public/images/external/photo-1504868584819-f8e8b4b6d7e3.webp",
+      "target": "public/images/external/photo-1504868584819-f8e8b4b6d7e3.webp",
+      "sha256": "2c3ceeb30b10308f87bae237db3528b132cab35770ede110fa11eb67fcef8f44",
+      "status": "create",
+      "linkedTo": [
+        "artikel:syarat-pengukuhan-pkp-terbaru (sampul)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1519085360753-af0119f7cbe7.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 600,
+      "height": 900,
+      "bytes": 18884,
+      "source": "public/images/external/photo-1519085360753-af0119f7cbe7.jpg",
+      "siapUpload": "public/images/external/photo-1519085360753-af0119f7cbe7.webp",
+      "target": "public/images/external/photo-1519085360753-af0119f7cbe7.webp",
+      "sha256": "d208c1ebf96946000b4782496329ba11a25d8f0609be7fdcb5b104e9cf76526f",
+      "status": "create",
+      "linkedTo": [
+        "tim:Bima Prasetyo (foto)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1521737604893-d14cc237f11d.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 1000,
+      "height": 656,
+      "bytes": 67766,
+      "source": "public/images/external/photo-1521737604893-d14cc237f11d.jpg",
+      "siapUpload": "public/images/external/photo-1521737604893-d14cc237f11d.webp",
+      "target": "public/images/external/photo-1521737604893-d14cc237f11d.webp",
+      "sha256": "4ab0c175b5993d9b1a2ed7b9703179e8cbbc0ad4f6fa3c2ef0196459a3edd176",
+      "status": "create",
+      "linkedTo": [],
+      "catatan": [
+        "Tidak terhubung ke koleksi CMS; hanya dipakai komponen statis (Opsional jika migrasi dibatasi ke aset CMS)."
+      ]
+    },
+    {
+      "filename": "migrasi-photo-1521791136064-7986c2920216.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 600,
+      "height": 401,
+      "bytes": 22686,
+      "source": "public/images/external/photo-1521791136064-7986c2920216.jpg",
+      "siapUpload": "public/images/external/photo-1521791136064-7986c2920216.webp",
+      "target": "public/images/external/photo-1521791136064-7986c2920216.webp",
+      "sha256": "03c70ba10867efc0875af2f60139078e5e221783218b0408a1014c1b3dabfe5c",
+      "status": "create",
+      "linkedTo": [
+        "artikel:batas-omzet-umkm-pajak-final (sampul)",
+        "artikel:pendapatan-tunjangan-pajak (sampul)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1531482615713-2afd69097998.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 1600,
+      "height": 1067,
+      "bytes": 152602,
+      "source": "public/images/external/photo-1531482615713-2afd69097998.jpg",
+      "siapUpload": "public/images/external/photo-1531482615713-2afd69097998.webp",
+      "target": "public/images/external/photo-1531482615713-2afd69097998.webp",
+      "sha256": "936223fd0e1a3c65fb4b0c4d7bf4eadc0b203bbfc87e77e89c0b6598f1981181",
+      "status": "create",
+      "linkedTo": [],
+      "catatan": [
+        "Tidak terhubung ke koleksi CMS; hanya dipakai komponen statis (Opsional jika migrasi dibatasi ke aset CMS)."
+      ]
+    },
+    {
+      "filename": "migrasi-photo-1551836022-d5d88e9218df.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 1000,
+      "height": 667,
+      "bytes": 69602,
+      "source": "public/images/external/photo-1551836022-d5d88e9218df.jpg",
+      "siapUpload": "public/images/external/photo-1551836022-d5d88e9218df.webp",
+      "target": "public/images/external/photo-1551836022-d5d88e9218df.webp",
+      "sha256": "0117e604177e4e878378d577378263d8b4eb7941997d774caff76839abf039fe",
+      "status": "create",
+      "linkedTo": [
+        "layanan:restitusi-pajak (gambar)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1553877522-43269d4ea984.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 1000,
+      "height": 667,
+      "bytes": 59832,
+      "source": "public/images/external/photo-1553877522-43269d4ea984.jpg",
+      "siapUpload": "public/images/external/photo-1553877522-43269d4ea984.webp",
+      "target": "public/images/external/photo-1553877522-43269d4ea984.webp",
+      "sha256": "e7d4224916c1954886f4b421a73879df8d3c8ff2d60a7e0c514dec857fd35517",
+      "status": "create",
+      "linkedTo": [],
+      "catatan": [
+        "Tidak terhubung ke koleksi CMS; hanya dipakai komponen statis (Opsional jika migrasi dibatasi ke aset CMS)."
+      ]
+    },
+    {
+      "filename": "migrasi-photo-1554224154-26032ffc0d07.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 600,
+      "height": 422,
+      "bytes": 21676,
+      "source": "public/images/external/photo-1554224154-26032ffc0d07.jpg",
+      "siapUpload": "public/images/external/photo-1554224154-26032ffc0d07.webp",
+      "target": "public/images/external/photo-1554224154-26032ffc0d07.webp",
+      "sha256": "5a73ad5b3b6be39522b6b37da37d74ca2508818b12c1643960e531356c07e0ef",
+      "status": "create",
+      "linkedTo": [
+        "artikel:tata-cara-pembukuan-umkm (sampul)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1554224155-8d04cb21cd6c.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 600,
+      "height": 400,
+      "bytes": 19694,
+      "source": "public/images/external/photo-1554224155-8d04cb21cd6c.jpg",
+      "siapUpload": "public/images/external/photo-1554224155-8d04cb21cd6c.webp",
+      "target": "public/images/external/photo-1554224155-8d04cb21cd6c.webp",
+      "sha256": "4aeaba9f09964e8d8fdd8775cdb15c1734d353327543c06093497493a15e7a82",
+      "status": "create",
+      "linkedTo": [
+        "artikel:struktur-modal-dan-beban (sampul)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1560472355-536de3962603.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 600,
+      "height": 400,
+      "bytes": 22672,
+      "source": "public/images/external/photo-1560472355-536de3962603.jpg",
+      "siapUpload": "public/images/external/photo-1560472355-536de3962603.webp",
+      "target": "public/images/external/photo-1560472355-536de3962603.webp",
+      "sha256": "12e17ecd2be47253c92a89d26b12984f3ba474d0269cc339d41d2e0dd95af373",
+      "status": "create",
+      "linkedTo": [
+        "artikel:neraca-laba-rugi-spt-badan (sampul)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1573497019940-1c28c88b4f3e.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 600,
+      "height": 900,
+      "bytes": 105102,
+      "source": "public/images/external/photo-1573497019940-1c28c88b4f3e.jpg",
+      "siapUpload": "public/images/external/photo-1573497019940-1c28c88b4f3e.webp",
+      "target": "public/images/external/photo-1573497019940-1c28c88b4f3e.webp",
+      "sha256": "1bd7b479729d953945677e38057c749e71c9e6cb0e66455f3be57c7d5986a1f9",
+      "status": "create",
+      "linkedTo": [
+        "tim:Maya Puspita (foto)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1579532537598-459ecdaf39cc.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 600,
+      "height": 900,
+      "bytes": 50444,
+      "source": "public/images/external/photo-1579532537598-459ecdaf39cc.jpg",
+      "siapUpload": "public/images/external/photo-1579532537598-459ecdaf39cc.webp",
+      "target": "public/images/external/photo-1579532537598-459ecdaf39cc.webp",
+      "sha256": "fc01de35f48eef2ecdb49c5d5b6cbc11363222930f0bb2e59325517e3793dda3",
+      "status": "create",
+      "linkedTo": [
+        "artikel:kredit-faktur-pajak-masukan (sampul)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1589829545856-d10d557cf95f.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 600,
+      "height": 400,
+      "bytes": 28518,
+      "source": "public/images/external/photo-1589829545856-d10d557cf95f.jpg",
+      "siapUpload": "public/images/external/photo-1589829545856-d10d557cf95f.webp",
+      "target": "public/images/external/photo-1589829545856-d10d557cf95f.webp",
+      "sha256": "967d353d6eef8b18979b8740a011df79c1b50eaf967401178b8f0ba63372751b",
+      "status": "create",
+      "linkedTo": [
+        "artikel:menjawab-sp2dk (sampul)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1591696331111-ef9586a5b17a.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 600,
+      "height": 400,
+      "bytes": 26490,
+      "source": "public/images/external/photo-1591696331111-ef9586a5b17a.jpg",
+      "siapUpload": "public/images/external/photo-1591696331111-ef9586a5b17a.webp",
+      "target": "public/images/external/photo-1591696331111-ef9586a5b17a.webp",
+      "sha256": "c1e6783fb0dae4d892c46ca0b192c626310c849428ad010cb39c413b85be8d4d",
+      "status": "create",
+      "linkedTo": [
+        "artikel:rekonsiliasi-fiskal-positif-negatif (sampul)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1611974789855-9c2a0a7236a3.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 600,
+      "height": 400,
+      "bytes": 18710,
+      "source": "public/images/external/photo-1611974789855-9c2a0a7236a3.jpg",
+      "siapUpload": "public/images/external/photo-1611974789855-9c2a0a7236a3.webp",
+      "target": "public/images/external/photo-1611974789855-9c2a0a7236a3.webp",
+      "sha256": "d3c3bc2fb46705260bee3ed771bc6f11b49fe7b1c656569a7d5f5fd4c8f65b5b",
+      "status": "create",
+      "linkedTo": [
+        "artikel:penerapan-ter-pph-21 (sampul)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-photo-1664575602554-2087b04935a5.webp",
+      "jenis": "foto",
+      "format": "webp",
+      "width": 1000,
+      "height": 1500,
+      "bytes": 93354,
+      "source": "public/images/external/photo-1664575602554-2087b04935a5.jpg",
+      "siapUpload": "public/images/external/photo-1664575602554-2087b04935a5.webp",
+      "target": "public/images/external/photo-1664575602554-2087b04935a5.webp",
+      "sha256": "c0ba16d9614ced4c58dba9fed87b2c8994ee63035288648ed07bc27644093c75",
+      "status": "create",
+      "linkedTo": [
+        "layanan:pengurusan-pkp (gambar)"
+      ],
+      "catatan": []
+    },
+    {
+      "filename": "migrasi-mitra-vidichi.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 149,
+      "height": 150,
+      "bytes": 1971,
+      "source": "public/images/clients/vidichi.jpg",
+      "siapUpload": "public/images/clients/vidichi.jpg",
+      "target": "public/images/clients/vidichi.jpg",
+      "sha256": "489fb144b31a36a569be66dc5b41ada82581d105ba6a45cbf8b378e4957d952c",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Vidichi (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-tantri.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 150,
+      "height": 150,
+      "bytes": 3060,
+      "source": "public/images/clients/tantri.jpg",
+      "siapUpload": "public/images/clients/tantri.jpg",
+      "target": "public/images/clients/tantri.jpg",
+      "sha256": "c5c6483462c2f1ff9420cd03df2dc88e2e2eb371092bde4094c02dc0c33b7e54",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Tantri (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-sumber-aneka-wangi.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 150,
+      "height": 150,
+      "bytes": 3238,
+      "source": "public/images/clients/sumber-aneka-wangi.jpg",
+      "siapUpload": "public/images/clients/sumber-aneka-wangi.jpg",
+      "target": "public/images/clients/sumber-aneka-wangi.jpg",
+      "sha256": "6d73e46c164c4e9076bacbae89e7c0aa84946066802d195ce9da8bce1fafdd36",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Sumber Aneka Wangi (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-satoshi.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 150,
+      "height": 150,
+      "bytes": 3122,
+      "source": "public/images/clients/satoshi.jpg",
+      "siapUpload": "public/images/clients/satoshi.jpg",
+      "target": "public/images/clients/satoshi.jpg",
+      "sha256": "e9fbdaff086601f14b98c812d6cb5bc28c676370b2e1dd1815d36427d349dd90",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Satoshi (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-power-computerindo.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 149,
+      "height": 150,
+      "bytes": 4111,
+      "source": "public/images/clients/power-computerindo.jpg",
+      "siapUpload": "public/images/clients/power-computerindo.jpg",
+      "target": "public/images/clients/power-computerindo.jpg",
+      "sha256": "95fd2c9c6c70f3ab40269be03edbebb80ebd87ff780a34cc106c6b10aee86eda",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Power Computerindo (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-pabriek-kuweh.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 150,
+      "height": 150,
+      "bytes": 3539,
+      "source": "public/images/clients/pabriek-kuweh.jpg",
+      "siapUpload": "public/images/clients/pabriek-kuweh.jpg",
+      "target": "public/images/clients/pabriek-kuweh.jpg",
+      "sha256": "be7e4190a67cbe0d2ce4c4750e905806d28f97a7bc8fa6bbea8508123f4cbc7f",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Pabriek Kuweh (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-oseal.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 149,
+      "height": 150,
+      "bytes": 3032,
+      "source": "public/images/clients/oseal.jpg",
+      "siapUpload": "public/images/clients/oseal.jpg",
+      "target": "public/images/clients/oseal.jpg",
+      "sha256": "aaa225107f31676ccfaf8f473cbb6739d9438b34f440d7a87c5fdcb6257cc09d",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Oseal (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-moonbow.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 149,
+      "height": 150,
+      "bytes": 3103,
+      "source": "public/images/clients/moonbow.jpg",
+      "siapUpload": "public/images/clients/moonbow.jpg",
+      "target": "public/images/clients/moonbow.jpg",
+      "sha256": "04674914c7950f0411f4736dac1f6496205a57fb9f299231ea99529543dfdb66",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Moonbow (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-kms.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 149,
+      "height": 150,
+      "bytes": 4889,
+      "source": "public/images/clients/kms.jpg",
+      "siapUpload": "public/images/clients/kms.jpg",
+      "target": "public/images/clients/kms.jpg",
+      "sha256": "8b8a25481d53d1c2d327ea39599366874b43bbbb9d6ece019859ee8453551256",
+      "status": "create",
+      "linkedTo": [
+        "mitra:KMS (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-kafeel-netz.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 150,
+      "height": 150,
+      "bytes": 5178,
+      "source": "public/images/clients/kafeel-netz.jpg",
+      "siapUpload": "public/images/clients/kafeel-netz.jpg",
+      "target": "public/images/clients/kafeel-netz.jpg",
+      "sha256": "7996d7a8ad9b31d020811eda7b6297ad1a9e9b25b9cdc022280a0bee24b6c9e4",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Kafeel Netz (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-javarudraksha.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 150,
+      "height": 150,
+      "bytes": 2640,
+      "source": "public/images/clients/javarudraksha.jpg",
+      "siapUpload": "public/images/clients/javarudraksha.jpg",
+      "target": "public/images/clients/javarudraksha.jpg",
+      "sha256": "7056423c1138b11e74cd3d1d5d7dd60ec944377981324f0c77275b9d4f6ec690",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Javarudraksha (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-happyeats.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 149,
+      "height": 150,
+      "bytes": 2967,
+      "source": "public/images/clients/happyeats.jpg",
+      "siapUpload": "public/images/clients/happyeats.jpg",
+      "target": "public/images/clients/happyeats.jpg",
+      "sha256": "1b612fb938d1802dfabe7b8c7e99c8e2326b968bc99f2f93bef5211671c59564",
+      "status": "create",
+      "linkedTo": [
+        "mitra:HappyEats (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-guri-senbei.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 150,
+      "height": 150,
+      "bytes": 8492,
+      "source": "public/images/clients/guri-senbei.jpg",
+      "siapUpload": "public/images/clients/guri-senbei.jpg",
+      "target": "public/images/clients/guri-senbei.jpg",
+      "sha256": "87688252dd4b1ca7a38a583ca7b56ac66a4a7e1d59f7a7e8ec8361b6cd44c7f4",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Guri Senbei (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-gmk-door.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 149,
+      "height": 150,
+      "bytes": 6078,
+      "source": "public/images/clients/gmk-door.jpg",
+      "siapUpload": "public/images/clients/gmk-door.jpg",
+      "target": "public/images/clients/gmk-door.jpg",
+      "sha256": "4b6f9d6728e46b8a5af11ebe6891c3d9897179b99321afa7f155ffacc0349828",
+      "status": "create",
+      "linkedTo": [
+        "mitra:GMK Door (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-dewa-rackindo.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 150,
+      "height": 150,
+      "bytes": 5008,
+      "source": "public/images/clients/dewa-rackindo.jpg",
+      "siapUpload": "public/images/clients/dewa-rackindo.jpg",
+      "target": "public/images/clients/dewa-rackindo.jpg",
+      "sha256": "c552b289cb3cb952b1c6610763ead94200f2d3936004af5c5b84b7f40e848f3c",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Dewa Rackindo (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-daingsuper.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 150,
+      "height": 150,
+      "bytes": 2722,
+      "source": "public/images/clients/daingsuper.jpg",
+      "siapUpload": "public/images/clients/daingsuper.jpg",
+      "target": "public/images/clients/daingsuper.jpg",
+      "sha256": "db935a34a81fe72b4edd61def40b5f6e915f85d19aa59516ee3a7a9fd4fd146c",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Daing Super (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-callme.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 150,
+      "height": 150,
+      "bytes": 4866,
+      "source": "public/images/clients/callme.jpg",
+      "siapUpload": "public/images/clients/callme.jpg",
+      "target": "public/images/clients/callme.jpg",
+      "sha256": "b843f790cd4dd954fc42596cf418425692c72eda9031bb8dde6a16d9417a2f42",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Callme (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-beeskin.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 150,
+      "height": 150,
+      "bytes": 4339,
+      "source": "public/images/clients/beeskin.jpg",
+      "siapUpload": "public/images/clients/beeskin.jpg",
+      "target": "public/images/clients/beeskin.jpg",
+      "sha256": "b3b83f3a3dfc27150ab163d8cac2560cdfa7573154f75745c73ef552ffac1784",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Beeskin (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-artave.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 149,
+      "height": 150,
+      "bytes": 2531,
+      "source": "public/images/clients/artave.jpg",
+      "siapUpload": "public/images/clients/artave.jpg",
+      "target": "public/images/clients/artave.jpg",
+      "sha256": "4b7c4f589ba41f15725073f4f3c386bf3211ba14a1a920df7c9cab909fe28549",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Artave (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "migrasi-mitra-arava-tour.jpg",
+      "jenis": "logo",
+      "format": "jpeg",
+      "width": 150,
+      "height": 150,
+      "bytes": 3405,
+      "source": "public/images/clients/arava-tour.jpg",
+      "siapUpload": "public/images/clients/arava-tour.jpg",
+      "target": "public/images/clients/arava-tour.jpg",
+      "sha256": "0c0bd22112c38dcf6b7a696b0d1e37d0e47174f4e4b80c005d2dfe4a465abadf",
+      "status": "create",
+      "linkedTo": [
+        "mitra:Arava Tour (logo)"
+      ],
+      "catatan": [
+        "JPG dipertahankan sesuai kebijakan logo.",
+        "Memerlukan bypass konversi WebP yang eksplisit/trusted saat apply; mekanisme belum dijalankan."
+      ]
+    },
+    {
+      "filename": "akiha.webp",
+      "jenis": "logo",
+      "format": "webp",
+      "width": 150,
+      "height": 150,
+      "bytes": 3016,
+      "source": "public/images/clients/akiha.jpg",
+      "siapUpload": "media/akiha.webp",
+      "target": "media/akiha.webp",
+      "sha256": "f719a762b14e80a858da0cb7277ca3953a4561824e562c0f0e0e0c860a518391",
+      "status": "existing",
+      "linkedTo": [
+        "mitra:akiha (logo)"
+      ],
+      "catatan": [
+        "Record media sudah ada dan relasi mitra sudah terisi; tidak dibuat ulang."
+      ]
+    }
+  ],
+  "relasi": [
+    {
+      "koleksi": "artikel",
+      "id": 12,
+      "kunci": "menjawab-sp2dk",
+      "field": "sampul",
+      "sekarang": null,
+      "target": "migrasi-photo-1589829545856-d10d557cf95f.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "artikel",
+      "id": 11,
+      "kunci": "transfer-pricing-dokumentasi",
+      "field": "sampul",
+      "sekarang": null,
+      "target": "migrasi-photo-1450101499163-c8848c66ca85.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "artikel",
+      "id": 10,
+      "kunci": "struktur-modal-dan-beban",
+      "field": "sampul",
+      "sekarang": null,
+      "target": "migrasi-photo-1554224155-8d04cb21cd6c.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "artikel",
+      "id": 9,
+      "kunci": "e-faktur-4-0",
+      "field": "sampul",
+      "sekarang": null,
+      "target": "migrasi-photo-1460925895917-afdab827c52f.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "artikel",
+      "id": 8,
+      "kunci": "pendapatan-tunjangan-pajak",
+      "field": "sampul",
+      "sekarang": null,
+      "target": "migrasi-photo-1521791136064-7986c2920216.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "artikel",
+      "id": 7,
+      "kunci": "tata-cara-pembukuan-umkm",
+      "field": "sampul",
+      "sekarang": null,
+      "target": "migrasi-photo-1554224154-26032ffc0d07.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "artikel",
+      "id": 6,
+      "kunci": "syarat-pengukuhan-pkp-terbaru",
+      "field": "sampul",
+      "sekarang": null,
+      "target": "migrasi-photo-1504868584819-f8e8b4b6d7e3.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "artikel",
+      "id": 5,
+      "kunci": "penerapan-ter-pph-21",
+      "field": "sampul",
+      "sekarang": null,
+      "target": "migrasi-photo-1611974789855-9c2a0a7236a3.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "artikel",
+      "id": 4,
+      "kunci": "neraca-laba-rugi-spt-badan",
+      "field": "sampul",
+      "sekarang": null,
+      "target": "migrasi-photo-1560472355-536de3962603.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "artikel",
+      "id": 3,
+      "kunci": "kredit-faktur-pajak-masukan",
+      "field": "sampul",
+      "sekarang": null,
+      "target": "migrasi-photo-1579532537598-459ecdaf39cc.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "artikel",
+      "id": 2,
+      "kunci": "batas-omzet-umkm-pajak-final",
+      "field": "sampul",
+      "sekarang": null,
+      "target": "migrasi-photo-1521791136064-7986c2920216.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "artikel",
+      "id": 1,
+      "kunci": "rekonsiliasi-fiskal-positif-negatif",
+      "field": "sampul",
+      "sekarang": null,
+      "target": "migrasi-photo-1591696331111-ef9586a5b17a.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "layanan",
+      "id": 4,
+      "kunci": "laporan-perpajakan-keuangan",
+      "field": "gambar",
+      "sekarang": null,
+      "target": "migrasi-photo-1454165804606-c3d57bc86b40.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "layanan",
+      "id": 3,
+      "kunci": "pengurusan-pkp",
+      "field": "gambar",
+      "sekarang": null,
+      "target": "migrasi-photo-1664575602554-2087b04935a5.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "layanan",
+      "id": 2,
+      "kunci": "laporan-spt",
+      "field": "gambar",
+      "sekarang": null,
+      "target": "migrasi-photo-1434626881859-194d67b2b86f.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "layanan",
+      "id": 1,
+      "kunci": "restitusi-pajak",
+      "field": "gambar",
+      "sekarang": null,
+      "target": "migrasi-photo-1551836022-d5d88e9218df.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "tim",
+      "id": 4,
+      "kunci": "Bima Prasetyo",
+      "field": "foto",
+      "sekarang": null,
+      "target": "migrasi-photo-1519085360753-af0119f7cbe7.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "tim",
+      "id": 3,
+      "kunci": "Maya Puspita",
+      "field": "foto",
+      "sekarang": null,
+      "target": "migrasi-photo-1573497019940-1c28c88b4f3e.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "tim",
+      "id": 2,
+      "kunci": "Risa Rizki Sharon",
+      "field": "foto",
+      "sekarang": null,
+      "target": "migrasi-photo-1494790108377-be9c29b29330.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "tim",
+      "id": 1,
+      "kunci": "Akmal Abdul Arik",
+      "field": "foto",
+      "sekarang": null,
+      "target": "migrasi-photo-1472099645785-5658abf4ff4e.webp",
+      "aksi": "isi",
+      "catatan": ""
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Vidichi",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-vidichi.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Tantri",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-tantri.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Sumber Aneka Wangi",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-sumber-aneka-wangi.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Satoshi",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-satoshi.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Power Computerindo",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-power-computerindo.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Pabriek Kuweh",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-pabriek-kuweh.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Oseal",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-oseal.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Moonbow",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-moonbow.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "KMS",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-kms.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Kafeel Netz",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-kafeel-netz.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Javarudraksha",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-javarudraksha.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "HappyEats",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-happyeats.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Guri Senbei",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-guri-senbei.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "GMK Door",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-gmk-door.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Dewa Rackindo",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-dewa-rackindo.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Daing Super",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-daingsuper.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Callme",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-callme.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Beeskin",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-beeskin.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Artave",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-artave.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": null,
+      "kunci": "Arava Tour",
+      "field": "logo",
+      "sekarang": null,
+      "target": "migrasi-mitra-arava-tour.jpg",
+      "aksi": "isi",
+      "catatan": "Record mitra baru."
+    },
+    {
+      "koleksi": "mitra",
+      "id": 1,
+      "kunci": "akiha",
+      "field": "logo",
+      "sekarang": "akiha.webp",
+      "target": "akiha.webp",
+      "aksi": "pertahankan",
+      "catatan": "Relasi logo sudah terisi; tidak ditimpa."
+    }
+  ],
+  "mitra": [
+    {
+      "nama": "Vidichi",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 2,
+      "media": "migrasi-mitra-vidichi.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Tantri",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 3,
+      "media": "migrasi-mitra-tantri.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Sumber Aneka Wangi",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 4,
+      "media": "migrasi-mitra-sumber-aneka-wangi.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Satoshi",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 5,
+      "media": "migrasi-mitra-satoshi.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Power Computerindo",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 6,
+      "media": "migrasi-mitra-power-computerindo.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Pabriek Kuweh",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 7,
+      "media": "migrasi-mitra-pabriek-kuweh.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Oseal",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 8,
+      "media": "migrasi-mitra-oseal.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Moonbow",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 9,
+      "media": "migrasi-mitra-moonbow.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "KMS",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 10,
+      "media": "migrasi-mitra-kms.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Kafeel Netz",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 11,
+      "media": "migrasi-mitra-kafeel-netz.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Javarudraksha",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 12,
+      "media": "migrasi-mitra-javarudraksha.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "HappyEats",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 13,
+      "media": "migrasi-mitra-happyeats.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Guri Senbei",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 14,
+      "media": "migrasi-mitra-guri-senbei.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "GMK Door",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 15,
+      "media": "migrasi-mitra-gmk-door.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Dewa Rackindo",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 16,
+      "media": "migrasi-mitra-dewa-rackindo.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Daing Super",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 17,
+      "media": "migrasi-mitra-daingsuper.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Callme",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 18,
+      "media": "migrasi-mitra-callme.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Beeskin",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 19,
+      "media": "migrasi-mitra-beeskin.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Artave",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 20,
+      "media": "migrasi-mitra-artave.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "Arava Tour",
+      "status": "create",
+      "id": null,
+      "urutanSekarang": null,
+      "urutanRencana": 21,
+      "media": "migrasi-mitra-arava-tour.jpg",
+      "aksi": "buat record mitra + isi logo",
+      "catatan": "Record mitra belum ada; akan dibuat, bukan menimpa record lama."
+    },
+    {
+      "nama": "akiha",
+      "status": "existing",
+      "id": 1,
+      "urutanSekarang": 1,
+      "urutanRencana": null,
+      "media": "akiha.webp",
+      "aksi": "pertahankan",
+      "catatan": "Record mitra dan relasi logo sudah ada; tidak dibuat ulang."
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { APIError } from "payload";
 
-import { adminSaja, bacaTerbitAtauStaf, stafPenulis } from "../access";
+import { adminSaja, stafPenulis } from "../access";
 import { validasiLayoutPuck } from "../puck/validation";
 
 /**
@@ -16,13 +16,16 @@ export const ReusableComponents: CollectionConfig = {
   labels: { singular: "Komponen Ulang Pakai", plural: "Komponen Ulang Pakai" },
   admin: {
     useAsTitle: "nama",
-    group: "Tampilan",
+    group: false,
     defaultColumns: ["nama", "kategori", "updatedAt"],
     description: "Section atau blok yang dapat ditambahkan kembali ke halaman.",
   },
   versions: { drafts: false },
   access: {
-    read: bacaTerbitAtauStaf,
+    // Koleksi ini tidak memakai versions/drafts, jadi tidak punya kolom
+    // `_status`. Predikat baca berbasis status terbit akan membuat query
+    // publik gagal 500; cukup batasi ke staf yang sudah login.
+    read: stafPenulis,
     create: stafPenulis,
     update: stafPenulis,
     delete: adminSaja,

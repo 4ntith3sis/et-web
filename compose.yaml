@@ -1,6 +1,10 @@
+name: easytax
+
 services:
   postgres:
-    image: postgres:16-alpine
+    # PostgreSQL resmi tidak membawa pgvector; image ini menyediakan
+    # ekstensi vector yang dibutuhkan tabel artikel_embeddings.
+    image: pgvector/pgvector:pg16
     container_name: easytax-postgres
     restart: unless-stopped
     environment:
@@ -20,10 +24,11 @@ services:
       start_period: 5s
 
   app:
+    container_name: easytax-app
+    image: easytax-app
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: easytax-app
     restart: unless-stopped
     depends_on:
       postgres:
@@ -37,8 +42,23 @@ services:
       PAYLOAD_CACHE_COMPONENTS_ENABLED: "true"
       PORT: 3004
       RUN_MIGRATIONS: "false"
+      # Semantic search tetap mati secara default. Nyalakan hanya setelah
+      # migrasi pgvector dan cache model tersedia.
+      RAG_ARTIKEL_ENABLED: ${RAG_ARTIKEL_ENABLED:-false}
+      RAG_EMBEDDING_MODEL: ${RAG_EMBEDDING_MODEL:-Horizon-Labs/multilingual-embedding-small}
+      RAG_EMBEDDING_CACHE_DIR: /app/model-cache
+      RAG_EMBEDDING_ALLOW_DOWNLOAD: ${RAG_EMBEDDING_ALLOW_DOWNLOAD:-false}
+      RAG_REQUEST_TIMEOUT_MS: ${RAG_REQUEST_TIMEOUT_MS:-15000}
     ports:
       - "${PORT:-3004}:3004"
+    volumes:
+      # Payload writes directly to the protected project media directory.
+      - ./media:/app/media
+      - ./tsconfig.json:/app/tsconfig.json:ro
+      - ./scripts:/app/scripts:ro
+      # Kosong secara default; mount cache model yang sudah disiapkan bila RAG
+      # diaktifkan.
+      - model_cache:/app/model-cache
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3004/api/health"]
       interval: 10s
@@ -48,4 +68,6 @@ services:
 
 volumes:
   postgres_data:
-    name: easytax_postgres_data
+    name: easytax_postgres_data_demo
+  model_cache:
+    name: easytax_model_cache

@@ -22,6 +22,7 @@ import { testimoni as testimoniStatis, type Testimoni as UjiTestimoni } from "@/
 import { timKonsultan as timStatis, type AnggotaTim } from "@/data/tim";
 import { getClient } from "@/lib/payload";
 import { formatHargaRupiah, formatSatuan } from "@/lib/format-harga";
+import { mediaUrlRelatif } from "@/lib/media-url";
 import type { BlokIsi } from "@/lib/artikel/toc";
 import type { ItemNavigasi } from "@/types";
 import type { Media, PengaturanSitus } from "@/payload-types";
@@ -31,9 +32,13 @@ import type { Media, PengaturanSitus } from "@/payload-types";
 
    Semua pembacaan Payload dibungkus `use cache` agar hasilnya ikut masuk
    "static shell" (Next.js Cache Components) dan tidak menandai halaman
-   sebagai dinamis. Setiap fungsi punya fallback ke data statis di
-   `src/data/*` supaya situs tetap tampil walau database kosong/belum
-   di-seed — sehingga migrasi ke CMS bisa bertahap tanpa memutus halaman.
+   sebagai dinamis.
+
+   Kueri yang berhasil tetapi kosong adalah keadaan CMS yang sah: koleksi
+   kosong berarti konten memang belum ada atau sudah di-unpublish/dihapus.
+   Data statis di `src/data/*` hanya dipakai sebagai jaring darurat ketika
+   database benar-benar gagal dibaca, dan kegagalannya selalu dicatat di
+   server agar tidak tersembunyi.
    ========================================================================== */
 
 type Situs = {
@@ -61,14 +66,55 @@ function formatTanggal(iso?: string | null): string {
   return Number.isNaN(d.getTime()) ? "" : FMT_TANGGAL.format(d);
 }
 
+// Aset statis dipakai sebagai cadangan HANYA ketika dokumen CMS ada tetapi
+// relasi gambarnya kosong. Ini menjaga halaman publik tetap lengkap saat
+// migrasi media belum dijalankan, tanpa menghidupkan kembali konten yang
+// sudah dihapus/unpublish dari CMS.
+const GAMBAR_LAYANAN_STATIS = new Map(layananStatis.map((l) => [l.slug, l.gambar]));
+const GAMBAR_ARTIKEL_STATIS = new Map(artikelStatis.map((a) => [a.slug, a.gambar]));
+const FOTO_TIM_STATIS = new Map(timStatis.map((o) => [o.nama, o.foto]));
+
 /** URL gambar dari relasi media, dengan dukungan ukuran bawaan Payload. */
 function mediaUrl(
   nilai: Media | number | null | undefined,
   ukuran?: keyof NonNullable<Media["sizes"]>,
 ): string | undefined {
   if (!nilai || typeof nilai !== "object") return undefined;
-  if (ukuran && nilai.sizes?.[ukuran]?.url) return nilai.sizes[ukuran]!.url!;
-  return nilai.url ?? undefined;
+  const mentah =
+    ukuran && nilai.sizes?.[ukuran]?.url
+      ? nilai.sizes[ukuran]!.url
+      : nilai.url;
+  return mediaUrlRelatif(mentah);
+}
+
+/** Sanitasi detail exception sebelum dicatat di log server. */
+function sanitasiDetailError(value: string): string {
+  return value
+    .replace(/(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?):\/\/[^\s"'`]+/gi, "[REDACTED_DATABASE_URL]")
+    .replace(/\b(password|passwd|token|secret|authorization|cookie|api[-_]?key)(\s*[=:]\s*)([^\s,;]+)/gi, "$1$2[REDACTED]")
+    .slice(0, 12_000);
+}
+
+/** Catat exception CMS yang telah disanitasi; detail hanya masuk log server. */
+function catatKegagalanCms(operasi: string, error: unknown): void {
+  const exception = error instanceof Error ? error : undefined;
+  const safeMessage = exception?.message ?? String(error);
+  console.error("[cms] pembacaan gagal", {
+    operasi,
+    errorName: exception?.name ?? "unknown",
+    errorMessage: sanitasiDetailError(safeMessage),
+    errorStack: exception?.stack ? sanitasiDetailError(exception.stack) : undefined,
+  });
+}
+
+/** Build prerender requires authoritative CMS data; never cache a fallback as build output. */
+function propagarKegagalanCmsSaatBuild(error: unknown): void {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.NEXT_PHASE === "phase-production-build"
+  ) {
+    throw error;
+  }
 }
 
 /* ---------------------------------------------------------------- Global */
@@ -84,7 +130,9 @@ export async function ambilPengaturan(): Promise<PengaturanSitus | null> {
       depth: 0,
       overrideAccess: false,
     })) as PengaturanSitus;
-  } catch {
+  } catch (error) {
+    catatKegagalanCms("pengaturan", error);
+    propagarKegagalanCmsSaatBuild(error);
     return null;
   }
 }
@@ -98,7 +146,9 @@ export async function ambilSitus(): Promise<Situs> {
     nama: g.nama || situsStatis.nama,
     subjudul: g.subjudul || situsStatis.subjudul,
     deskripsi: g.deskripsi || situsStatis.deskripsi,
-    whatsappUrl: g.whatsappUrl || situsStatis.whatsappUrl,
+    // Nomor utama halaman Kontak wajib berasal dari CMS; jangan fallback ke
+    // URL/nomor statis yang dapat mengarah ke nomor konsultasi lain.
+    whatsappUrl: g.whatsappUrl || "",
     kontak: {
       telepon: g.telepon || situsStatis.kontak.telepon,
       email: g.email || situsStatis.kontak.email,
@@ -150,24 +200,24 @@ export async function ambilLayanan(): Promise<LayananBeranda[]> {
       draft: false,
       overrideAccess: false,
     });
-    if (res.docs.length === 0) return layananStatis;
+    // Kueri berhasil tetapi kosong berarti CMS memang tidak punya layanan
+    // terbit. Jangan hidupkan lagi data statis: itu membuat layanan yang
+    // sudah dihapus/di-unpublish muncul kembali.
+    if (res.docs.length === 0) return [];
 
-    return res.docs.map((d) => {
-      const statik = layananStatis.find(
-        (s) => s.slug.toLowerCase() === d.slug.toLowerCase(),
-      );
-      return {
-        slug: d.slug,
-        judul: d.judul,
-        subjudul: d.subjudul ?? statik?.subjudul ?? "",
-        ringkasan: d.ringkasan,
-        gambar:
-          mediaUrl(d.gambar, "sampul") ||
-          statik?.gambar ||
-          FALLBACK_GAMBAR_LAYANAN,
-      } satisfies LayananBeranda;
-    });
-  } catch {
+    return res.docs.map((d) => ({
+      slug: d.slug,
+      judul: d.judul,
+      subjudul: d.subjudul ?? "",
+      ringkasan: d.ringkasan,
+      gambar:
+        mediaUrl(d.gambar, "sampul") ||
+        GAMBAR_LAYANAN_STATIS.get(d.slug) ||
+        FALLBACK_GAMBAR_LAYANAN,
+    }));
+  } catch (error) {
+    catatKegagalanCms("layanan", error);
+    propagarKegagalanCmsSaatBuild(error);
     return layananStatis;
   }
 }
@@ -204,7 +254,8 @@ export async function ambilDetailLayanan(
       d = all.docs.find((doc) => doc.slug.toLowerCase() === cleanSlug);
     }
 
-    if (!d) return cariDetailLayanan(cleanSlug);
+    // Tidak ditemukan setelah kueri berhasil = memang tidak terbit/terhapus.
+    if (!d) return undefined;
 
     const paket: PaketLayanan[] = (d.paket ?? []).map((p) => ({
       nama: p.nama,
@@ -218,14 +269,12 @@ export async function ambilDetailLayanan(
       jawaban: f.jawaban,
     }));
 
-    if (paket.length === 0 && faq.length === 0) {
-      const statik = cariDetailLayanan(cleanSlug);
-      if (statik) return statik;
-      return { slug: d.slug, paket: [], faq: [] };
-    }
-
+    // Dokumen CMS yang sengaja dikosongkan tetap harus tercermin kosong;
+    // fallback statis hanya dipakai saat CMS benar-benar gagal dibaca.
     return { slug: d.slug, paket, faq };
-  } catch {
+  } catch (error) {
+    catatKegagalanCms("layanan-detail", error);
+    propagarKegagalanCmsSaatBuild(error);
     return cariDetailLayanan(cleanSlug);
   }
 }
@@ -247,30 +296,33 @@ export async function ambilArtikel(): Promise<ArtikelBeranda[]> {
       draft: false,
       overrideAccess: false,
     });
-    if (res.docs.length === 0) return artikelStatis;
+    // CMS kosong adalah keadaan yang sah (belum ada atau semua di-unpublish),
+    // bukan alasan menampilkan kembali artikel statis yang mungkin sudah
+    // dihapus dari CMS.
+    if (res.docs.length === 0) return [];
 
-    return res.docs.map((a) => {
-      const statik = artikelStatis.find(
-        (s) => s.slug.toLowerCase() === a.slug.toLowerCase(),
-      );
-      const kategori =
+    return res.docs.map((a) => ({
+      slug: a.slug,
+      judul: a.judul,
+      ringkasan: a.ringkasan,
+      kategori:
         typeof a.kategori === "object" && a.kategori
           ? a.kategori.nama
-          : (statik?.kategori ?? "Perpajakan");
-      return {
-        slug: a.slug,
-        judul: a.judul,
-        ringkasan: a.ringkasan,
-        kategori,
-        tanggal: formatTanggal(a.tanggalTerbit) || statik?.tanggal || "",
-        waktuBaca: a.waktuBaca ?? statik?.waktuBaca ?? "5 mnt baca",
-        gambar:
-          mediaUrl(a.sampul) ||
-          statik?.gambar ||
-          FALLBACK_GAMBAR_ARTIKEL,
-      } satisfies ArtikelBeranda;
-    });
-  } catch {
+          : "Perpajakan",
+      kategoriSlug:
+        typeof a.kategori === "object" && a.kategori
+          ? a.kategori.slug
+          : undefined,
+      tanggal: formatTanggal(a.tanggalTerbit),
+      waktuBaca: a.waktuBaca ?? "5 mnt baca",
+      gambar:
+        mediaUrl(a.sampul) ||
+        GAMBAR_ARTIKEL_STATIS.get(a.slug) ||
+        FALLBACK_GAMBAR_ARTIKEL,
+    }));
+  } catch (error) {
+    catatKegagalanCms("artikel", error);
+    propagarKegagalanCmsSaatBuild(error);
     return artikelStatis;
   }
 }
@@ -307,7 +359,8 @@ export async function ambilArtikelDetail(
       a = all.docs.find((doc) => doc.slug.toLowerCase() === cleanSlug);
     }
 
-    if (!a) return cariArtikelDetail(cleanSlug);
+    // Tidak ditemukan setelah kueri berhasil = memang tidak terbit/terhapus.
+    if (!a) return undefined;
 
     const blok: BlokIsi[] = (a.blok ?? []).map((b) => {
       if (b.blockType === "paragraf") {
@@ -327,20 +380,23 @@ export async function ambilArtikelDetail(
       };
     });
 
-    if (blok.length === 0) return cariArtikelDetail(cleanSlug);
-
     const penulis =
       typeof a.penulis === "object" && a.penulis
         ? a.penulis.nama || a.penulis.email
         : undefined;
 
+    // Blok kosong tetap kosong. Halaman detail dapat menampilkan ringkasan
+    // sebagai isi cadangan, tetapi tidak boleh memunculkan kembali naskah
+    // statis yang sudah dihapus dari CMS.
     return {
       slug: a.slug,
       penulis: penulis || "Tim Konsultan EasyTax",
       tags: (a.tag ?? []).map((t) => t.teks),
       blok,
     };
-  } catch {
+  } catch (error) {
+    catatKegagalanCms("artikel-detail", error);
+    propagarKegagalanCmsSaatBuild(error);
     return cariArtikelDetail(cleanSlug);
   }
 }
@@ -361,7 +417,7 @@ export async function ambilTestimoni(): Promise<UjiTestimoni[]> {
       draft: false,
       overrideAccess: false,
     });
-    if (res.docs.length === 0) return testimoniStatis;
+    if (res.docs.length === 0) return [];
 
     return res.docs.map((t) => ({
       nama: t.nama,
@@ -369,8 +425,11 @@ export async function ambilTestimoni(): Promise<UjiTestimoni[]> {
       kutipan: t.kutipan,
       inisial: t.inisial ?? t.nama.slice(0, 2).toUpperCase(),
       rating: t.rating ?? 5,
+      fotoProfil: mediaUrl(t.fotoProfil, "kartu") || undefined,
+      deskripsi: t.deskripsi ?? undefined,
     }));
-  } catch {
+  } catch (error) {
+    catatKegagalanCms("testimoni", error);
     return testimoniStatis;
   }
 }
@@ -390,25 +449,21 @@ export async function ambilTim(): Promise<AnggotaTim[]> {
       draft: false,
       overrideAccess: false,
     });
-    if (res.docs.length === 0) return timStatis;
+    if (res.docs.length === 0) return [];
 
-    return res.docs.map((o) => {
-      const statik = timStatis.find(
-        (s) => s.nama.toLowerCase() === o.nama.toLowerCase(),
-      );
-      return {
-        nama: o.nama,
-        jabatan: o.jabatan,
-        lisensi: o.lisensi ?? statik?.lisensi ?? "BKP",
-        level: o.level ?? statik?.level ?? "C",
-        foto:
-          mediaUrl(o.foto, "kartu") ||
-          statik?.foto ||
-          FALLBACK_FOTO_TIM,
-        bio: o.bio ?? statik?.bio ?? "",
-      } satisfies AnggotaTim;
-    });
-  } catch {
+    return res.docs.map((o) => ({
+      nama: o.nama,
+      jabatan: o.jabatan,
+      lisensi: o.lisensi ?? "BKP",
+      level: o.level ?? "C",
+      foto:
+        mediaUrl(o.foto, "kartu") ||
+        FOTO_TIM_STATIS.get(o.nama) ||
+        FALLBACK_FOTO_TIM,
+      bio: o.bio ?? "",
+    }));
+  } catch (error) {
+    catatKegagalanCms("tim", error);
     return timStatis;
   }
 }
@@ -428,26 +483,15 @@ export async function ambilMitra(): Promise<{ nama: string; src: string }[]> {
       draft: false,
       overrideAccess: false,
     });
-    if (res.docs.length === 0) {
-      return logoMitra.map((file) => ({
-        nama: namaMitra[file] ?? "Mitra EasyTax",
-        src: `/images/clients/${file}`,
-      }));
-    }
+    if (res.docs.length === 0) return [];
 
-    const hasil = res.docs
+    // Logo yang belum diunggah tidak diisi dengan logo statis: editor dapat
+    // menghapus mitra dari CMS dan hasilnya harus benar-benar kosong.
+    return res.docs
       .map((m) => ({ nama: m.nama, src: mediaUrl(m.logo) ?? "" }))
       .filter((m) => m.src.length > 0);
-
-    if (hasil.length === 0) {
-      return logoMitra.map((file) => ({
-        nama: namaMitra[file] ?? "Mitra EasyTax",
-        src: `/images/clients/${file}`,
-      }));
-    }
-
-    return hasil;
-  } catch {
+  } catch (error) {
+    catatKegagalanCms("mitra", error);
     return logoMitra.map((file) => ({
       nama: namaMitra[file] ?? "Mitra EasyTax",
       src: `/images/clients/${file}`,

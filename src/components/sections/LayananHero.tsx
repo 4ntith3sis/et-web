@@ -1,6 +1,6 @@
 import { Pengguna } from "@/components/ikon";
 import { HeroPanel } from "@/components/ui/HeroPanel";
-import { situs } from "@/data/situs";
+import { tautanKonsultasiWhatsApp } from "@/features/whatsapp/config";
 
 /** Hero halaman /layanan — memakai panel hero bersama. */
 export function LayananHero() {
@@ -19,13 +19,13 @@ export function LayananHero() {
       deskripsi="Mulai dari pelaporan SPT tahunan, pembukuan bulanan, hingga pendampingan audit dan pengurusan PKP. Dikelola langsung oleh konsultan pajak berizin resmi (BKP) dan berpengalaman menangani berbagai industri di Indonesia."
       tombolUtama={{
         label: "Konsultasi Gratis",
-        href: "/api/konsultasi/whatsapp?sumber=layanan-hero",
+        href: tautanKonsultasiWhatsApp(undefined, "layanan-hero"),
         eksternal: true,
       }}
       tombolSekunder={{ label: "Eksplorasi Layanan", href: "#katalog-layanan" }}
       bukti={["Pembukuan Sesuai SAK", "Konsultan Berizin Resmi"]}
       gambar={{
-        src: "https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=1000&q=80",
+        src: "/images/external/photo-1553877522-43269d4ea984.webp",
         alt: "Layanan Konsultan Pajak EasyTax",
       }}
       kartu={[

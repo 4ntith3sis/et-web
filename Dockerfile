@@ -3,7 +3,9 @@
 # ==============================================================================
 # Stage 1: Dependencies
 # ==============================================================================
-FROM node:20-bookworm-slim AS deps
+# Node 24 LTS mendukung TypeScript native untuk CLI Payload (script cms:*)
+# tanpa tsx; image runtime tetap menjalankan Next.js production.
+FROM node:24-bookworm-slim AS deps
 WORKDIR /app
 
 # Install dependensi sistem yang dibutuhkan untuk build native modul (sharp/node-gyp jika ada)
@@ -18,27 +20,30 @@ RUN npm ci
 # ==============================================================================
 # Stage 2: Builder
 # ==============================================================================
-FROM node:20-bookworm-slim AS builder
+FROM node:24-bookworm-slim AS builder
 WORKDIR /app
 
 # Salin modul dari stage deps
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Environment placeholder untuk proses build statis Next.js
+# Payload memerlukan secret valid ketika konfigurasi dimuat saat build.
+# Gunakan secret sementara melalui mount BuildKit, tidak disimpan dalam layer.
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PAYLOAD_SECRET=build_time_secret_placeholder_minimum_32_characters_long
 ENV DATABASE_URI=postgresql://dummy:dummy@localhost:5432/dummy
 ENV PAYLOAD_CACHE_COMPONENTS_ENABLED=true
+# Batasi worker build agar build tidak kehabisan RAM pada Docker Desktop 4 GB.
+ENV CIRCLE_NODE_TOTAL=2
 
 # Jalankan typecheck dan build
-RUN npm run build
+RUN --mount=type=secret,id=payload_secret,required=true \
+    PAYLOAD_SECRET="$(cat /run/secrets/payload_secret)" npm run build
 
 # ==============================================================================
 # Stage 3: Runner (Production)
 # ==============================================================================
-FROM node:20-bookworm-slim AS runner
+FROM node:24-bookworm-slim AS runner
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
@@ -62,6 +67,7 @@ COPY --from=builder /app/next.config.ts ./next.config.ts
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/scripts ./scripts
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
 COPY --from=builder --chmod=755 /app/docker/entrypoint.sh ./docker/entrypoint.sh
 
 # Atur kepemilikan berkas ke user non-root

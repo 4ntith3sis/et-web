@@ -18,7 +18,7 @@ export const timKonsultan: AnggotaTim[] = [
     jabatan: "Senior Tax Consultant",
     lisensi: "BKP",
     level: "A",
-    foto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=600&q=80",
+    foto: "/images/external/photo-1472099645785-5658abf4ff4e.webp",
     bio: "Mendampingi kepatuhan pajak dan pelaporan perusahaan dari berbagai industri sejak lebih dari delapan tahun.",
   },
   {
@@ -26,7 +26,7 @@ export const timKonsultan: AnggotaTim[] = [
     jabatan: "Tax & Financial Advisor",
     lisensi: "BKP",
     level: "B",
-    foto: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=80",
+    foto: "/images/external/photo-1494790108377-be9c29b29330.webp",
     bio: "Berfokus pada perencanaan keuangan dan advisory perpajakan bisnis yang tumbuh cepat.",
   },
   {
@@ -34,7 +34,7 @@ export const timKonsultan: AnggotaTim[] = [
     jabatan: "Tax Consultant",
     lisensi: "BKP",
     level: "B",
-    foto: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=600&q=80",
+    foto: "/images/external/photo-1573497019940-1c28c88b4f3e.webp",
     bio: "Spesialis pelaporan SPT dan penyusunan laporan UMKM agar kewajiban pajak tetap ringan namun terlindungi.",
   },
   {
@@ -42,7 +42,7 @@ export const timKonsultan: AnggotaTim[] = [
     jabatan: "Accounting & Tax Review",
     lisensi: "BKP",
     level: "C",
-    foto: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=600&q=80",
+    foto: "/images/external/photo-1519085360753-af0119f7cbe7.webp",
     bio: "Menyusun pembukuan berbasis SAK sekaligus meninjau kepatuhan sebelum laporan diserahkan ke klien.",
   },
 ];

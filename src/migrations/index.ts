@@ -3,6 +3,7 @@ import * as migration_20261019_020612_page_layouts from './20261019_020612_page_
 import * as migration_20261021_222125 from './20261021_222125';
 import * as migration_20261022_artikel_embeddings from './20261022_artikel_embeddings';
 import * as migration_20261023_artikel_embeddings_local from './20261023_artikel_embeddings_local';
+import * as migration_20261023_testimoni_foto_profil from './20261023_testimoni_foto_profil';
 
 export const migrations = [
   {
@@ -18,16 +19,21 @@ export const migrations = [
   {
     up: migration_20261021_222125.up,
     down: migration_20261021_222125.down,
-    name: '20261021_222125'
+    name: '20261021_222125',
   },
   {
     up: migration_20261022_artikel_embeddings.up,
     down: migration_20261022_artikel_embeddings.down,
-    name: '20261022_artikel_embeddings'
+    name: '20261022_artikel_embeddings',
   },
   {
     up: migration_20261023_artikel_embeddings_local.up,
     down: migration_20261023_artikel_embeddings_local.down,
-    name: '20261023_artikel_embeddings_local'
+    name: '20261023_artikel_embeddings_local',
+  },
+  {
+    up: migration_20261023_testimoni_foto_profil.up,
+    down: migration_20261023_testimoni_foto_profil.down,
+    name: '20261023_testimoni_foto_profil',
   },
 ];

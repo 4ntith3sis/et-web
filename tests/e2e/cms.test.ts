@@ -155,8 +155,8 @@ describe("halaman publik hanya membaca versi published", () => {
     }
   });
 
-  it("mengembalikan published layout untuk template dan halaman pembanding", async () => {
-    for (const key of ["template-layanan-detail", "template-artikel-detail", "tentang-kami"]) {
+  it("mengembalikan layout hanya saat baris utama berstatus published", async () => {
+    for (const key of ["beranda", "tentang-kami"]) {
       const result = await ambilLayoutTerbit(key);
       assert.ok(result.layout, `${key} harus memiliki layout published valid`);
       assert.equal(result.source, "published");
@@ -164,10 +164,18 @@ describe("halaman publik hanya membaca versi published", () => {
     }
   });
 
-  it("tetap mengembalikan null untuk layout yang belum dipublikasikan", async () => {
-    for (const key of ["kontak", "layanan-listing", "tulisan-pajak-listing"]) {
+  it("tidak menghidupkan lagi snapshot published setelah halaman ditarik", async () => {
+    // Template detail saat ini punya snapshot published lama, tetapi baris
+    // utamanya draft. Snapshot seperti itu tidak boleh tampil di publik.
+    for (const key of [
+      "template-layanan-detail",
+      "template-artikel-detail",
+      "kontak",
+      "layanan-listing",
+      "tulisan-pajak-listing",
+    ]) {
       const result = await ambilLayoutTerbit(key);
-      assert.equal(result.layout, null, `${key} tidak boleh membaca draft`);
+      assert.equal(result.layout, null, `${key} tidak boleh membaca draft/snapshot lama`);
       assert.equal(result.source, "fallback");
       assert.equal(result.reason, "snapshot_missing");
     }
@@ -350,6 +358,47 @@ describe("siklus draft → publish", { skip: READ_ONLY_PHASE2A }, () => {
         assert.equal(status, 400, `harus 400, dapat ${status}`);
         return true;
       },
+    );
+  });
+
+  it("dua publish bersamaan dengan revisi sama hanya menghasilkan satu penulisan", async () => {
+    const draft = await ambilDraft();
+    assert.ok(draft?.id);
+    const revisiAwal = draft!.revision ?? 0;
+    const kirimPublish = () =>
+      payload.update({
+        collection: "page-layouts",
+        id: draft!.id!,
+        data: {
+          layout: draft!.layout,
+          revision: revisiAwal,
+          _status: "published",
+          publishedAt: new Date().toISOString(),
+        } as never,
+        draft: false,
+        overrideAccess: true,
+      });
+
+    const hasil = await Promise.allSettled([kirimPublish(), kirimPublish()]);
+    const sukses = hasil.filter((h) => h.status === "fulfilled");
+    const gagal = hasil.filter(
+      (h): h is PromiseRejectedResult => h.status === "rejected",
+    );
+
+    assert.equal(sukses.length, 1, "tepat satu publish harus berhasil");
+    assert.equal(gagal.length, 1, "publish kedua harus ditolak");
+    assert.equal(
+      (gagal[0]!.reason as { status?: number }).status,
+      409,
+      "publish kedua harus mendapat 409",
+    );
+
+    const akhir = await ambilDraft();
+    assert.equal(akhir?._status, "published");
+    assert.equal(
+      akhir?.revision,
+      revisiAwal + 1,
+      "revisi hanya boleh naik satu kali",
     );
   });
 });

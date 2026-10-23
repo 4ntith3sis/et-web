@@ -20,10 +20,10 @@ import { halamanDariKey } from "../puck/types";
  * Seed konten awal dari `src/data/*` ke Payload, plus satu akun admin.
  *
  * Idempoten: setiap entri dicek lewat kunci uniknya (slug/nama/email) lalu
- * dibuat bila belum ada. Gambar diunduh dari sumber statis (Unsplash) atau
- * dibaca dari `public/images/clients/*`, diunggah ke koleksi `media`, dan
- * ditautkan ke dokumen. Bila unduhan gagal, relasi dibiarkan kosong sehingga
- * situs memakai fallback statis.
+ * dibuat bila belum ada. Gambar dibaca dari aset WebP statis proyek atau
+ * `public/images/clients/*`, diunggah ke koleksi `media`, dan ditautkan ke
+ * dokumen. Bila pembacaan gagal, relasi dibiarkan kosong sehingga situs
+ * memakai fallback statis.
  *
  * Jalankan: npm run cms -- run src/seed/index.ts --disable-transpile
  */
@@ -76,9 +76,17 @@ const mimeDariEkstensi = (file: string): string => {
 /* ---------------------------------------------------------------- Media */
 
 async function cariMedia(nama: string): Promise<number | undefined> {
+  // Nama lama dapat berakhiran .jpg sementara media baru .webp. Cocokkan
+  // berdasarkan batang nama agar seed ulang tidak membuat record duplikat.
+  const dasar = nama.replace(/\.[^.]+$/, "");
   const ada = await PAYLOAD.find({
     collection: "media",
-    where: { filename: { equals: nama } },
+    where: {
+      or: [
+        { filename: { equals: nama } },
+        { filename: { like: `${dasar}.%` } },
+      ],
+    },
     limit: 1,
     overrideAccess: true,
   });
@@ -108,9 +116,16 @@ async function unggahGambar(
   }
 }
 
-function unggahDariUrl(url: string, nama: string, alt: string) {
+function unggahDariSumber(sumber: string, nama: string, alt: string) {
   return unggahGambar(nama, alt, async () => {
-    const res = await fetch(url);
+    // Aset statis proyek dibaca langsung dari public/ agar seed tidak
+    // bergantung pada Unsplash dan tetap memakai file WebP yang sudah ada.
+    if (sumber.startsWith("/")) {
+      const file = path.join(ROOT, "public", sumber.replace(/^\//, ""));
+      const data = await fs.readFile(file);
+      return { data, mimetype: mimeDariEkstensi(file) };
+    }
+    const res = await fetch(sumber);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const tipe = res.headers.get("content-type") ?? "image/jpeg";
     const buf = Buffer.from(await res.arrayBuffer());
@@ -244,9 +259,9 @@ async function main() {
   /* Layanan. */
   for (const [i, l] of layananBeranda.entries()) {
     const detail = detailLayanan.find((d) => d.slug === l.slug);
-    const gambar = await unggahDariUrl(
+    const gambar = await unggahDariSumber(
       l.gambar,
-      `seed-layanan-${l.slug}.jpg`,
+      `seed-layanan-${l.slug}.webp`,
       l.judul,
     );
     await upsert(
@@ -279,9 +294,9 @@ async function main() {
   /* Artikel. */
   for (const a of artikelBeranda) {
     const detail = artikelDetail.find((d) => d.slug === a.slug);
-    const sampul = await unggahDariUrl(
+    const sampul = await unggahDariSumber(
       a.gambar,
-      `seed-artikel-${a.slug}.jpg`,
+      `seed-artikel-${a.slug}.webp`,
       a.judul,
     );
     await upsert(
@@ -339,9 +354,9 @@ async function main() {
 
   /* Tim. */
   for (const [i, o] of timKonsultan.entries()) {
-    const foto = await unggahDariUrl(
+    const foto = await unggahDariSumber(
       o.foto,
-      `seed-tim-${o.nama.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.jpg`,
+      `seed-tim-${o.nama.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.webp`,
       o.nama,
     );
     await upsert(

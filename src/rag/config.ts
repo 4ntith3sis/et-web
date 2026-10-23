@@ -37,4 +37,12 @@ export const RAG_CONFIG = {
   /** Panjang maksimal pertanyaan pengguna dalam karakter. */
   maxQueryLength: Number(process.env.RAG_MAX_QUERY_LENGTH) || 500,
 
+  /**
+   * Batas waktu aplikasi untuk retrieval. `maxDuration` hanya petunjuk
+   * platform; tanpa batas ini request bisa menggantung saat model/DB macet.
+   */
+  requestTimeoutMs: Math.min(
+    60000,
+    Math.max(1000, Number(process.env.RAG_REQUEST_TIMEOUT_MS) || 15000),
+  ),
 } as const;

@@ -37,7 +37,7 @@ function dependencies(
   cari: DependensiRoutePencarian["cari"],
   enabled = true,
 ): DependensiRoutePencarian {
-  return { enabled, cari };
+  return { enabled, cari, enrichirSampul: async (items) => items };
 }
 
 describe("POST /api/artikel/search", () => {

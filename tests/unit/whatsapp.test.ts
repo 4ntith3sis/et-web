@@ -5,8 +5,62 @@ import { normalisasiNomorWA, validasiNomorWA, buatTautanWA, sanitasiPesanWA } fr
 import { pilihNomorSesuaiStrategi } from "@/features/whatsapp/router";
 import { validasiQueryKonsultasi, validasiInputNomor } from "@/features/whatsapp/schema";
 import type { WhatsAppNumberRecord } from "@/features/whatsapp/types";
+import {
+  PESAN_WHATSAPP_KONSULTASI,
+  pesanKonsultasiLayanan,
+  pesanKonsultasiPaket,
+  tautanKonsultasiWhatsApp,
+} from "@/features/whatsapp/config";
 
 describe("unit test: WhatsApp utilities & validation", () => {
+  it("mengarahkan konsultasi ke router server dengan pesan dan sumber", () => {
+    const url = new URL(tautanKonsultasiWhatsApp(undefined, "navbar"), "https://easytax.invalid");
+    assert.equal(url.pathname, "/api/konsultasi/whatsapp");
+    assert.equal(url.searchParams.get("sumber"), "navbar");
+    assert.equal(url.searchParams.get("pesan"), "Halo, saya ingin berkonsultasi mengenai layanan EasyTax. Bisa dibantu dengan informasi lebih lanjut?");
+    assert.equal(PESAN_WHATSAPP_KONSULTASI, "Halo, saya ingin berkonsultasi mengenai layanan EasyTax. Bisa dibantu dengan informasi lebih lanjut?");
+  });
+
+  it("menerima konteks hanya dari nilai yang diizinkan dan memakai umum jika tidak tersedia", () => {
+    const layanan = validasiQueryKonsultasi(new URLSearchParams({ konteks: "layanan" }));
+    const paket = validasiQueryKonsultasi(new URLSearchParams({ konteks: "paket" }));
+    const fallback = validasiQueryKonsultasi(new URLSearchParams({ konteks: "../../secret" }));
+    assert.equal(layanan.konteks, "layanan");
+    assert.equal(paket.konteks, "paket");
+    assert.equal(fallback.konteks, "umum");
+  });
+
+  it("meng-encode pesan layanan dan paket dengan karakter khusus untuk query URL", () => {
+    const pesanLayanan = "Halo, layanan Pajak & SPT Tahunan?";
+    const url = new URL(tautanKonsultasiWhatsApp(pesanLayanan, "detail", "layanan"), "https://easytax.invalid");
+    assert.equal(url.searchParams.get("pesan"), pesanLayanan);
+    assert.equal(url.searchParams.get("konteks"), "layanan");
+  });
+
+  it("membentuk pesan dinamis dari nama layanan/paket dan fallback umum untuk konteks kosong", () => {
+    assert.equal(
+      pesanKonsultasiLayanan("Pajak & SPT Tahunan"),
+      "Halo, saya ingin berkonsultasi mengenai layanan Pajak & SPT Tahunan dari EasyTax. Bisa dijelaskan mengenai cakupan layanan, proses, dan biayanya?",
+    );
+    assert.equal(
+      pesanKonsultasiPaket("Paket UMKM Premium", "Rp 1.500.000", "per bulan"),
+      "Halo, saya tertarik dengan paket Paket UMKM Premium dari EasyTax. Saya ingin mengetahui detail manfaat, harga Rp 1.500.000 per bulan, dan cara berlangganannya.",
+    );
+    assert.equal(pesanKonsultasiLayanan(null), PESAN_WHATSAPP_KONSULTASI);
+    assert.equal(pesanKonsultasiPaket(undefined), PESAN_WHATSAPP_KONSULTASI);
+    const url = new URL(tautanKonsultasiWhatsApp(pesanKonsultasiPaket("Paket Pajak & Akuntansi"), "paket", "paket"), "https://easytax.invalid");
+    assert.match(url.searchParams.get("pesan") || "", /Paket Pajak & Akuntansi/);
+    assert.match(url.searchParams.get("pesan") || "", /EasyTax/);
+  });
+
+  it("nomor hanya dipilih dari kandidat aktif yang diberikan CMS", () => {
+    const cmsNumber: WhatsAppNumberRecord = {
+      id: "cms-1", label: "Konsultan CMS", phoneNumber: "6281111111111",
+      enabled: true, priority: 1, weight: 1, assignedCount: 0,
+    };
+    assert.equal(pilihNomorSesuaiStrategi([cmsNumber], "round-robin")?.phoneNumber, cmsNumber.phoneNumber);
+  });
+
   it("normalisasi nomor WhatsApp menghilangkan +, spasi, tanda kurung, dan tanda hubung", () => {
     assert.equal(normalisasiNomorWA("+62 812-3456-7890"), "6281234567890");
     assert.equal(normalisasiNomorWA("+1 (555) 019-2834"), "15550192834");
@@ -187,7 +241,7 @@ describe("unit & integration test: WhatsApp routing fallback & security", () => 
     return normalized && validasiNomorWA(normalized) ? normalized : null;
   };
 
-  it("kebijakan fallback: mengosongkan fallbackWhatsAppNumber menghasilkan fallbackNumber null", () => {
+  it("fallback nomor CMS dinormalisasi dan data kosong tidak menghasilkan nomor pengganti", () => {
     // Verifikasi normalisasi fallback ketika admin sengaja mengosongkan
     const inputKosong = "";
     const inputSpasi = "   ";
@@ -198,9 +252,11 @@ describe("unit & integration test: WhatsApp routing fallback & security", () => 
     assert.equal(fallbackKonfigurasi(inputSpasi), null);
     assert.equal(fallbackKonfigurasi(inputNull), null);
     assert.equal(fallbackKonfigurasi(inputValid), "6281119200080");
+    assert.equal(pilihNomorSesuaiStrategi([], "round-robin"), null);
   });
 
-  it("keamanan endpoint SiteSettings: field routing internal dilindungi dari akses anonim", async () => {
+  it("keamanan endpoint SiteSettings: field routing internal dilindungi dari akses anonim", { skip: !process.env.TEST_DATABASE_URL }, async () => {
+    assertTestDatabase(process.env.TEST_DATABASE_URL!);
     const { getPayload } = await import("payload");
     const { default: config } = await import("@/payload.config");
     const payload = await getPayload({ config });
@@ -232,7 +288,11 @@ describe("unit & integration test: WhatsApp routing fallback & security", () => 
     assert.ok(settingsAdmin.whatsappRoutingStrategy !== undefined);
   });
 
-  it("konkurensi Round Robin: eksekusi atomik mencegah lost update pada permintaan bersamaan", async () => {
+  it("konkurensi Round Robin: eksekusi atomik mencegah lost update pada permintaan bersamaan", { skip: !process.env.TEST_DATABASE_URL }, async () => {
+    assertTestDatabase(process.env.TEST_DATABASE_URL!);
+    process.env.DATABASE_URI = process.env.TEST_DATABASE_URL!;
+    process.env.DATABASE_URL = process.env.TEST_DATABASE_URL!;
+    process.env.EASYTAX_DEV_DATABASE_URI = process.env.TEST_DATABASE_URL!;
     const { getPayload } = await import("payload");
     const { default: config } = await import("@/payload.config");
     const { pilihDanTugaskanNomorAtomik } = await import("@/features/whatsapp/router");
@@ -299,3 +359,14 @@ describe("unit & integration test: WhatsApp routing fallback & security", () => 
     }
   });
 });
+
+function assertTestDatabase(rawUrl: string): void {
+  const url = new URL(rawUrl);
+  const database = decodeURIComponent(url.pathname.slice(1));
+  const hostname = url.hostname.replace(/^\[|\]$/g, "");
+  if (!new Set(["localhost", "127.0.0.1", "::1"]).has(hostname) || !/(^|_)test($|_)/i.test(database)) {
+    throw new Error("Integration tests require a loopback PostgreSQL database with 'test' in its name");
+  }
+  process.env.DATABASE_URI = url.toString();
+  process.env.DATABASE_URL = url.toString();
+}

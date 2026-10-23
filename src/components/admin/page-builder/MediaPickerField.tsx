@@ -3,6 +3,7 @@
 import type { CustomFieldRender } from "@puckeditor/core";
 import { useEffect, useMemo, useState } from "react";
 
+import { mediaUrlRelatif } from "@/lib/media-url";
 import type { MediaTerpilih } from "@/puck/komponen/tipe";
 
 import { daftarMedia, type MediaRingkas } from "./media-actions";
@@ -46,6 +47,7 @@ export const MediaPickerField: CustomFieldRender<MediaTerpilih> = ({
   }, [terbuka, cari]);
 
   const pilihan = useMemo(() => (value?.url ? value : null), [value]);
+  const urlPilihan = mediaUrlRelatif(pilihan?.url);
 
   return (
     <div style={{ display: "grid", gap: 8 }}>
@@ -63,9 +65,9 @@ export const MediaPickerField: CustomFieldRender<MediaTerpilih> = ({
             flexShrink: 0,
           }}
         >
-          {pilihan?.url ? (
+          {urlPilihan ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={pilihan.url} alt={pilihan.alt} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src={urlPilihan} alt={pilihan?.alt ?? ""} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
             <span style={{ fontSize: 11, color: "#9ca3af" }}>Kosong</span>
           )}
@@ -85,9 +87,9 @@ export const MediaPickerField: CustomFieldRender<MediaTerpilih> = ({
               cursor: "pointer",
             }}
           >
-            {pilihan?.url ? "Ganti gambar" : "Pilih gambar"}
+            {urlPilihan ? "Ganti gambar" : "Pilih gambar"}
           </button>
-          {pilihan?.url ? (
+          {urlPilihan ? (
             <button
               type="button"
               disabled={readOnly}
@@ -109,12 +111,12 @@ export const MediaPickerField: CustomFieldRender<MediaTerpilih> = ({
         </div>
       </div>
 
-      {pilihan?.url ? (
+      {urlPilihan ? (
         <input
           type="text"
-          value={pilihan.alt}
+          value={pilihan?.alt ?? ""}
           placeholder="Teks alternatif gambar"
-          onChange={(e) => onChange({ ...pilihan, alt: e.target.value })}
+          onChange={(e) => pilihan && onChange({ ...pilihan, alt: e.target.value })}
           style={{ padding: "7px 10px", borderRadius: 7, border: "1px solid #d1d5db", fontSize: 13 }}
         />
       ) : null}

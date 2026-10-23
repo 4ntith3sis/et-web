@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { connection } from "next/server";
 
 import { CTA } from "@/components/sections/CTA";
 import { CaraKerja } from "@/components/sections/CaraKerja";
@@ -15,12 +16,6 @@ import { ambilDetailLayanan, ambilLayanan } from "@/cms/konten";
 
 type Params = Promise<{ slug: string }>;
 
-/** Prerender semua slug layanan dari CMS (fallback ke data statis). */
-export async function generateStaticParams() {
-  const daftar = await ambilLayanan();
-  return daftar.map((l) => ({ slug: l.slug }));
-}
-
 export async function generateMetadata({
   params,
 }: {
@@ -31,11 +26,13 @@ export async function generateMetadata({
   const layanan = (await ambilLayanan()).find(
     (l) => l.slug.toLowerCase() === cleanSlug,
   );
-  if (!layanan) return { title: "Layanan Tidak Ditemukan | EasyTax" };
+  if (!layanan) notFound();
 
+  const canonical = `/layanan/${encodeURIComponent(layanan.slug)}`;
   return {
     title: `${layanan.judul} | EasyTax`,
     description: layanan.ringkasan,
+    alternates: { canonical },
     openGraph: {
       title: layanan.judul,
       description: layanan.ringkasan,
@@ -43,14 +40,21 @@ export async function generateMetadata({
       type: "website",
       locale: "id_ID",
       siteName: "EasyTax",
+      url: canonical,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: layanan.judul,
+      description: layanan.ringkasan,
+      images: layanan.gambar ? [layanan.gambar] : undefined,
     },
   };
 }
 
 /**
- * `params` hanya boleh dibaca di dalam <Suspense> (Next.js dengan
- * cacheComponents), jadi halaman membungkus seluruh isinya dengan
- * fallback ringan.
+ * `params` dibaca di dalam <Suspense> agar shell halaman tetap dapat
+ * di-stream (cacheComponents). Status 404 untuk slug yang tidak ada ditangani
+ * lebih awal oleh proxy, sebelum shell dikirim.
  */
 export default function HalamanLayanan({ params }: { params: Params }) {
   return (
@@ -61,6 +65,7 @@ export default function HalamanLayanan({ params }: { params: Params }) {
 }
 
 async function IsiLayanan({ params }: { params: Params }) {
+  await connection();
   const { slug } = await params;
   const cleanSlug = slug.toLowerCase();
   const [layanan, detail] = await Promise.all([

@@ -33,7 +33,7 @@ export async function ambilNomorWAAktif(): Promise<WhatsAppNumberRecord[]> {
       .filter((n) => validasiNomorWA(n.phoneNumber));
   } catch (error) {
     console.error("[WhatsApp Queries] Gagal mengambil nomor aktif:", error);
-    return [];
+    throw new Error("Data nomor WhatsApp CMS tidak dapat diakses.", { cause: error });
   }
 }
 
@@ -57,14 +57,7 @@ export async function ambilPengaturanWhatsApp(): Promise<WhatsAppRoutingConfig> 
     } | null;
 
     if (!settings) {
-      return {
-        whatsappEnabled: true,
-        routingStrategy: "round-robin",
-        defaultMessage: "Halo EasyTax, saya ingin berkonsultasi mengenai perpajakan perusahaan saya.",
-        fallbackNumber: null,
-        buttonLabel: "Konsultasi Gratis",
-        manualNumberId: null,
-      };
+      throw new Error("Pengaturan WhatsApp CMS tidak tersedia.");
     }
 
     let manualId: number | string | null = null;
@@ -90,14 +83,7 @@ export async function ambilPengaturanWhatsApp(): Promise<WhatsAppRoutingConfig> 
       manualNumberId: manualId,
     };
   } catch (error) {
-    console.error("[WhatsApp Queries] Gagal mengambil SiteSettings:", error);
-    return {
-      whatsappEnabled: true,
-      routingStrategy: "round-robin",
-      defaultMessage: "Halo EasyTax, saya ingin berkonsultasi mengenai perpajakan perusahaan saya.",
-      fallbackNumber: null,
-      buttonLabel: "Konsultasi Gratis",
-      manualNumberId: null,
-    };
+    console.error("[WhatsApp Queries] Gagal mengambil SiteSettings.");
+    throw new Error("Pengaturan WhatsApp CMS tidak dapat diakses.", { cause: error });
   }
 }

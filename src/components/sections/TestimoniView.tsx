@@ -1,5 +1,6 @@
 import { Bintang } from "@/components/ikon";
 import type { Testimoni as ItemTestimoni } from "@/data/testimoni";
+import Image from "next/image";
 
 /**
  * Bagian presentasional section Testimoni: satu baris kartu kutipan yang
@@ -21,11 +22,26 @@ function Kartu({ item }: { item: ItemTestimoni }) {
       <blockquote className="text-[0.92rem] leading-[1.65] font-medium text-teks-sekunder">
         &ldquo;{item.kutipan}&rdquo;
       </blockquote>
+      {item.deskripsi ? (
+        <p className="mt-2 text-[0.82rem] leading-[1.55] text-teks-redup">
+          {item.deskripsi}
+        </p>
+      ) : null}
 
       <figcaption className="mt-5 flex items-center gap-3 border-t border-garis-halus pt-4">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-navy-900 font-heading text-[0.75rem] font-bold text-yellow-500">
-          {item.inisial}
-        </span>
+        {item.fotoProfil ? (
+          <Image
+            src={item.fotoProfil}
+            alt={`Foto profil ${item.nama}`}
+            width={36}
+            height={36}
+            className="h-9 w-9 shrink-0 rounded-full object-cover"
+          />
+        ) : (
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-navy-900 font-heading text-[0.75rem] font-bold text-yellow-500">
+            {item.inisial}
+          </span>
+        )}
         <span className="min-w-0">
           <span className="block font-heading text-[0.9rem] font-bold tracking-[-0.02em] text-navy-900">
             {item.nama}

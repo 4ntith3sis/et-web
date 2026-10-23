@@ -39,6 +39,15 @@ describe("article search request validation", () => {
     });
   });
 
+  it("rejects oversized bodies even when content-length is missing", () => {
+    const body = JSON.stringify({ query: "pajak", padding: "x".repeat(5000) });
+    assert.deepEqual(validasiRequestPencarian(body, null), {
+      ok: false,
+      status: 413,
+      error: "Ukuran request terlalu besar.",
+    });
+  });
+
   it("rejects queries over the configured maximum after trimming", () => {
     assert.deepEqual(validasiRequestPencarian(JSON.stringify({ query: ` ${"x".repeat(501)} ` }), null), {
       ok: false,

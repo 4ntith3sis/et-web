@@ -19,7 +19,7 @@ export const hookIndexArtikelRAG: CollectionAfterChangeHook = async ({
 }) => {
   if (!RAG_CONFIG.enabled) return doc;
   const payload = await (await import("@/lib/payload/client")).getClient();
-  let published: typeof doc | null = null;
+  let published: typeof doc | null;
   try {
     published = await payload.findByID({
       collection: "artikel",
@@ -27,22 +27,43 @@ export const hookIndexArtikelRAG: CollectionAfterChangeHook = async ({
       draft: false,
       overrideAccess: true,
     }) as typeof doc;
-  } catch {
-    // Tidak ada versi publik: fail closed dengan menghapus index lama.
+  } catch (error) {
+    // A failed/ambiguous read is never evidence that an article is unpublished.
+    // Keep the previous public index until a successful read confirms status.
+    console.error("[RAG] Gagal memeriksa versi terbit artikel; index lama dipertahankan", {
+      artikelId: doc.id,
+      errorType: error instanceof Error ? error.name : "unknown",
+    });
+    return doc;
   }
 
   if (published?._status === "published" && published.slug && published.judul) {
     const { indexArtikel } = await import("./article-indexing");
-    await indexArtikel({
+    const hasil = await indexArtikel({
       id: published.id as number,
       judul: published.judul as string,
       slug: published.slug as string,
       ringkasan: published.ringkasan as string | undefined,
       blok: published.blok as Parameters<typeof indexArtikel>[0]["blok"],
     });
-  } else {
+    if (hasil.status === "error") {
+      console.error("[RAG] Index artikel gagal diperbarui; index lama mungkin basi", {
+        artikelId: hasil.artikelId,
+        slug: hasil.slug,
+      });
+    }
+  } else if (published?._status === "draft" || doc._status === "draft") {
     const { hapusIndexArtikel } = await import("./article-indexing");
-    await hapusIndexArtikel(doc.id as number);
+    const hasil = await hapusIndexArtikel(doc.id as number);
+    if (hasil.status === "error") {
+      console.error("[RAG] Index artikel gagal dihapus", { artikelId: doc.id });
+    }
+  } else {
+    // Missing status/slug is ambiguous. Do not make public content disappear
+    // because of a malformed read result.
+    console.error("[RAG] Status publik artikel tidak dapat dipastikan; index lama dipertahankan", {
+      artikelId: doc.id,
+    });
   }
 
   return doc;

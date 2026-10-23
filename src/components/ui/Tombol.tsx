@@ -51,6 +51,8 @@ interface PropDasar {
   ikonKanan?: React.ReactNode;
   /** Buka di tab baru. Hanya berlaku saat dirender sebagai <a>. */
   external?: boolean;
+  /** Gunakan navigasi browser penuh, bukan transisi client-side Next.js. */
+  navigasiPenuh?: boolean;
   /** Nonaktifkan interaksi + redupkan tampilan. */
   disabled?: boolean;
 }
@@ -114,6 +116,8 @@ export function Tombol(props: PropsTombol) {
     ikonKiri,
     ikonKanan,
     disabled,
+    external,
+    navigasiPenuh,
   } = props;
 
   const gaya = GabungGaya({ varian, ukuran, className, disabled });
@@ -134,12 +138,14 @@ export function Tombol(props: PropsTombol) {
     ikonKiri: _ikonKiri,
     ikonKanan: _ikonKanan,
     disabled: _disabled,
+    external: _external,
+    navigasiPenuh: _navigasiPenuh,
     ...sisa
   } = props;
 
   /* href undefined -> <button> */
   if (props.href === undefined) {
-    const { tipe = "button", href: _href, ...sisaTombol } = sisa as PropTombol;
+    const { tipe = "button", href: _href, external: _external, ...sisaTombol } = sisa as PropTombol;
     return (
       <button type={tipe} disabled={disabled} className={gaya} {...sisaTombol}>
         {isi}
@@ -148,8 +154,8 @@ export function Tombol(props: PropsTombol) {
   }
 
   /* external -> <a target=_blank> */
-  if (props.external) {
-    const { href, external: _external, ...sisaTautan } = sisa as PropTautanEksternal;
+  if (external) {
+    const { href, ...sisaTautan } = sisa as PropTautanEksternal;
     return (
       <a
         href={href}
@@ -158,6 +164,18 @@ export function Tombol(props: PropsTombol) {
         className={gaya}
         {...sisaTautan}
       >
+        {isi}
+      </a>
+    );
+  }
+
+  // API konsultasi merespons redirect ke wa.me. Next Link mencoba mengambil
+  // redirect sebagai RSC fetch dan terkena CORS lintas-origin; navigasi biasa
+  // membiarkan browser mengikuti redirect sebagai navigasi dokumen.
+  if (navigasiPenuh) {
+    const { href, ...sisaTautan } = sisa as PropTautanInternal;
+    return (
+      <a href={href} className={gaya} {...sisaTautan}>
         {isi}
       </a>
     );

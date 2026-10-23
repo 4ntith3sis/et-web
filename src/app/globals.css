@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+.artikel-search-input::-webkit-search-cancel-button,
+.artikel-search-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 /* ==========================================================================
    Design token EasyTax
    Brand (source of truth): logo resmi EasyTax — diekstrak dari piksel solid
@@ -55,13 +61,9 @@
   --color-teks-redup: #637083;
   --color-teks-terang: #cbd5e1;
 
-  /* --- Tipografi ---
-     Nilai var next/font (kelas `*_variable` di layout publik) diduplikasi ke
-     sini agar kanvas Puck di dokumen admin ikut mengenal nama keluarga yang
-     sama; `@font-face`-nya sudah ikut terbundel di CSS ini. Nilai identik
-     dengan next/font, jadi halaman publik tidak berubah. */
-  --font-outfit: "Outfit", "Outfit Fallback";
-  --font-jakarta: "Plus Jakarta Sans", "Plus Jakarta Sans Fallback";
+  /* --- Tipografi --- */
+  --font-outfit: "Outfit", "Arial", sans-serif;
+  --font-jakarta: "Plus Jakarta Sans", "Arial", sans-serif;
   --font-heading: var(--font-outfit), "Outfit", sans-serif;
   --font-body: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
 

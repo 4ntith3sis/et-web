@@ -7,8 +7,12 @@ import type { RoutingResult } from "./types";
 /**
  * Server action untuk mendapatkan tujuan URL konsultasi WhatsApp.
  */
-export async function dapatkanUrlKonsultasi(pesanKustom?: string, sumber?: string): Promise<RoutingResult> {
-  return prosesRoutingKonsultasi({ pesanKustom, sumber });
+export async function dapatkanUrlKonsultasi(
+  pesanKustom?: string,
+  sumber?: string,
+  konteks?: "layanan" | "paket" | "umum",
+): Promise<RoutingResult> {
+  return prosesRoutingKonsultasi({ pesanKustom, sumber, konteks });
 }
 
 /**

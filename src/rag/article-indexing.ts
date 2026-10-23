@@ -183,8 +183,8 @@ export async function hapusIndexArtikel(
 }
 
 /**
- * Reindex semua artikel published. Untuk penggunaan saat setup awal
- * atau saat model embedding berubah.
+ * Reindex semua artikel published secara berhalaman agar tidak berhenti di 500.
+ * Untuk penggunaan saat setup awal atau saat model embedding berubah.
  */
 export async function reindexSemuaArtikel(
   forceReindex = false,
@@ -194,34 +194,41 @@ export async function reindexSemuaArtikel(
   const { getClient } = await import("@/lib/payload/client");
   const payload = await getClient();
 
-  const { docs: artikelList } = await payload.find({
-    collection: "artikel",
-    limit: 500,
-    depth: 1,
-    draft: false,
-    overrideAccess: true,
-    where: { _status: { equals: "published" } },
-  });
-
   const hasil: HasilIndexing[] = [];
-  for (const doc of artikelList) {
-    const d = doc as unknown as Record<string, unknown>;
-    const artikel: ArtikelUntukEkstraksi = {
-      id: doc.id as number,
-      judul: d.judul as string,
-      slug: d.slug as string,
-      ringkasan: d.ringkasan as string | undefined,
-      blok: d.blok as ArtikelUntukEkstraksi["blok"],
-    };
+  let page = 1;
+  let totalPages = 1;
+  do {
+    const result = await payload.find({
+      collection: "artikel",
+      limit: 100,
+      page,
+      depth: 1,
+      draft: false,
+      overrideAccess: true,
+      where: { _status: { equals: "published" } },
+      sort: "id",
+    });
+    totalPages = result.totalPages;
+    for (const doc of result.docs) {
+      const d = doc as unknown as Record<string, unknown>;
+      const artikel: ArtikelUntukEkstraksi = {
+        id: doc.id as number,
+        judul: d.judul as string,
+        slug: d.slug as string,
+        ringkasan: d.ringkasan as string | undefined,
+        blok: d.blok as ArtikelUntukEkstraksi["blok"],
+      };
 
-    if (!artikel.id || !artikel.slug || !artikel.judul) {
-      hasil.push({ artikelId: artikel.id, slug: artikel.slug, status: "skipped" });
-      continue;
+      if (!artikel.id || !artikel.slug || !artikel.judul) {
+        hasil.push({ artikelId: artikel.id, slug: artikel.slug, status: "skipped" });
+        continue;
+      }
+
+      const hasilSatu = await indexArtikel(artikel, forceReindex);
+      hasil.push(hasilSatu);
     }
-
-    const hasilSatu = await indexArtikel(artikel, forceReindex);
-    hasil.push(hasilSatu);
-  }
+    page++;
+  } while (page <= totalPages);
 
   return hasil;
 }

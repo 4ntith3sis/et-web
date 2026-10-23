@@ -32,6 +32,21 @@ export const Testimonials: CollectionConfig = {
       admin: { description: "1–3 huruf untuk avatar, mis. ES." },
     },
     {
+      name: "fotoProfil",
+      label: "Foto Profil",
+      type: "upload",
+      relationTo: "media",
+      required: false,
+      admin: { description: "Opsional. Jika kosong, avatar menampilkan inisial." },
+    },
+    {
+      name: "deskripsi",
+      label: "Deskripsi",
+      type: "textarea",
+      required: false,
+      admin: { description: "Deskripsi/konteks singkat testimoni (opsional)." },
+    },
+    {
       name: "rating",
       label: "Rating (1–5)",
       type: "number",

@@ -81,7 +81,8 @@ export function hitungDaftarArtikel(
   const kueri = (params.q ?? "").trim();
   const q = kueri.toLowerCase();
   const terpilih = artikelBeranda.filter((a) => {
-    if (kategoriAktif && a.kategori.toLowerCase() !== kategoriAktif) return false;
+    const slugKategori = a.kategoriSlug ?? a.kategori.toLowerCase();
+    if (kategoriAktif && slugKategori !== kategoriAktif) return false;
     if (!q) return true;
     return (
       a.judul.toLowerCase().includes(q) || a.ringkasan.toLowerCase().includes(q)

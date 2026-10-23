@@ -4,7 +4,7 @@ import Link from "next/link";
 import { PanahKanan, Rumah } from "@/components/ikon";
 import { Tombol } from "@/components/ui/Tombol";
 import { ConsultationButton } from "@/features/whatsapp/components/ConsultationButton";
-import { situs } from "@/data/situs";
+import { pesanKonsultasiLayanan } from "@/features/whatsapp/config";
 import type { LayananBeranda } from "@/data/layanan";
 import type { PropsLayananDetailHero } from "@/puck/types";
 
@@ -32,11 +32,6 @@ export function LayananDetailHero({
 
   const lencana = desain?.lencana ?? "Tax & Accounting Service";
   const ctaLabel = desain?.ctaLabel ?? "Konsultasi Gratis";
-  const ctaHrefAwal = desain?.ctaHref || situs.whatsappUrl;
-  const ctaHref =
-    !ctaHrefAwal || ctaHrefAwal.includes("mauorder")
-      ? `/api/konsultasi/whatsapp?pesan=${encodeURIComponent(`Halo EasyTax, saya ingin konsultasi mengenai layanan ${judul}.`)}&sumber=layanan-detail`
-      : ctaHrefAwal;
   const tengah = desain?.perataan === "tengah";
   const breadcrumbBeranda = desain?.breadcrumbBeranda || "Beranda";
   const breadcrumbLayanan = desain?.breadcrumbLayanan || "Layanan";
@@ -94,7 +89,8 @@ export function LayananDetailHero({
           <div className={tengah ? "mx-auto mt-7 w-fit lg:mx-0" : "mt-7 w-fit"}>
             <ConsultationButton
               sumber="layanan-detail"
-              pesan={`Halo EasyTax, saya ingin konsultasi mengenai layanan ${judul}.`}
+              konteks="layanan"
+              pesan={pesanKonsultasiLayanan(judul)}
               ukuran="sedang"
               ikonKanan={<PanahKanan className="h-4 w-4" />}
               className="w-fit rounded-md py-[13px] px-7 text-[0.95rem]"

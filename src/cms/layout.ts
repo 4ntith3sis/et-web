@@ -40,52 +40,55 @@ export async function ambilLayoutTerbit(
 
   try {
     const payload = await getClient();
-    /* A collection `find({ draft: false })` reads the main row, which can be
-       draft even while a published snapshot remains in version history.
-       Query the official versions API; collection readVersions access limits
-       anonymous requests to published snapshots, and we re-check status. */
-    const res = await payload.findVersions({
+    /*
+     * Sumber kebenaran publik adalah baris utama yang berstatus published.
+     * Jangan memilih snapshot published dari riwayat versi tanpa memeriksa
+     * baris utama: Payload menyimpan snapshot lama saat halaman di-unpublish,
+     * sehingga snapshot tersebut bisa terus tampil setelah konten ditarik.
+     */
+    const res = await payload.find({
       collection: "page-layouts",
-      where: {
-        "version.pageKey": { equals: pageKey },
-        "version._status": { equals: "published" },
-      },
-      limit: 100,
-      sort: "-version.revision",
+      where: { pageKey: { equals: pageKey } },
+      limit: 1,
       depth: 0,
+      draft: false,
       overrideAccess: false,
     });
-    const selection = detailPemilihanSnapshot(res.docs);
-    const selected = selection.layout;
-    if (selected) {
-      const layoutSiap = lengkapiLayoutDefaultProps(selected, pageKey);
-      if (process.env.EASYTAX_LAYOUT_TRACE === "1") {
-        console.info("[layout-trace]", {
-          pageKey,
-          source: "published",
-          status: "published_found",
-          revision: selection.revision,
-        });
-      }
-      return {
-        layout: layoutSiap,
-        source: "published",
-        revision: selection.revision,
-      };
+    const doc = res.docs[0] as
+      | { layout?: unknown; revision?: unknown }
+      | undefined;
+    if (!doc) return hasilTanpaSnapshot("snapshot_missing");
+
+    const hasil = validasiLayoutPuck(doc.layout);
+    if (!hasil.ok || hasil.data.content.length === 0) {
+      return hasilTanpaSnapshot("validation_error");
     }
+
+    const layoutSiap = lengkapiLayoutDefaultProps(hasil.data, pageKey);
+    const revision =
+      typeof doc.revision === "number" ? doc.revision : undefined;
     if (process.env.EASYTAX_LAYOUT_TRACE === "1") {
       console.info("[layout-trace]", {
         pageKey,
-        source: "fallback",
-        status: selection.reason,
+        source: "published",
+        status: "published_found",
+        revision,
       });
     }
-    return hasilTanpaSnapshot(selection.reason);
+    return { layout: layoutSiap, source: "published", revision };
   } catch (error) {
+    const exception = error instanceof Error ? error : undefined;
+    const sanitasi = (value: string) =>
+      value
+        .replace(/(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?):\/\/[^\s"'`]+/gi, "[REDACTED_DATABASE_URL]")
+        .replace(/\b(password|passwd|token|secret|authorization|cookie|api[-_]?key)(\s*[=:]\s*)([^\s,;]+)/gi, "$1$2[REDACTED]")
+        .slice(0, 12_000);
     console.error("[layout-read-error]", {
+      operasi: "ambilLayoutTerbit",
       pageKey,
-      status: klasifikasikanQueryLayout(error),
-      errorType: error instanceof Error ? error.name : "unknown",
+      errorName: exception?.name ?? "unknown",
+      errorMessage: sanitasi(exception?.message ?? String(error)),
+      errorStack: exception?.stack ? sanitasi(exception.stack) : undefined,
     });
     return hasilTanpaSnapshot("snapshot_missing");
   }
@@ -260,27 +263,14 @@ export async function konteksRepresentatif(
 }
 
 /**
- * URL konkret untuk tombol Preview di Page Manager.
+ * URL tombol Preview di Page Manager.
  *
- * Rute template (`/layanan/[slug]`, `/tulisan-pajak/[slug]`) adalah *pola*,
- * bukan URL yang bisa dibuka. Fungsi ini memetakan page type ke URL nyata:
- * halaman statis memakai rutenya sendiri, sedangkan template memakai slug
- * record pertama yang benar-benar ada di Payload (tanpa data dummy). Bila
- * belum ada record, mengembalikan `null` agar UI menampilkan empty state.
+ * Preview harus menampilkan layout draft, bukan halaman publik. Halaman statis
+ * dan template sama-sama punya route pratinjau staf di `/pratinjau/<pageKey>`.
  */
 export async function urlPratinjauHalaman(
   pageKey: string,
-  rute: string,
-): Promise<string | null> {
-  if (!rute.includes("[")) return rute;
-
-  if (pageKey === "template-layanan-detail") {
-    const [contoh] = await ambilLayanan();
-    return contoh ? `/layanan/${contoh.slug}` : null;
-  }
-  if (pageKey === "template-artikel-detail") {
-    const [contoh] = await ambilArtikel();
-    return contoh ? `/tulisan-pajak/${contoh.slug}` : null;
-  }
-  return null;
+  _rute: string,
+): Promise<string> {
+  return `/pratinjau/${pageKey}`;
 }

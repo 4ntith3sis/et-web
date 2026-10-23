@@ -1,3 +1,7 @@
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { connection } from "next/server";
+
 import { Artikel } from "@/components/sections/Artikel";
 import { CTA } from "@/components/sections/CTA";
 import { CaraKerja } from "@/components/sections/CaraKerja";
@@ -11,6 +15,22 @@ import { PuckRender } from "@/components/puck/PuckRender";
 import { ambilArtikel, ambilLayanan } from "@/cms/konten";
 import { ambilLayoutTerbit } from "@/cms/layout";
 
+export const metadata: Metadata = {
+  title: "EasyTax | Konsultan Pajak & Akuntansi untuk Bisnis",
+  description:
+    "Jasa konsultan pajak dan akuntansi terpercaya untuk UMKM dan perusahaan di Indonesia. Pelaporan SPT, pembukuan, pengurusan PKP, restitusi, dan pendampingan audit.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "EasyTax | Konsultan Pajak & Akuntansi untuk Bisnis",
+    description:
+      "Jasa konsultan pajak dan akuntansi terpercaya untuk UMKM dan perusahaan di Indonesia.",
+    type: "website",
+    locale: "id_ID",
+    siteName: "EasyTax",
+    url: "/",
+  },
+};
+
 /**
  * Landing page EasyTax.
  *
@@ -19,7 +39,12 @@ import { ambilLayoutTerbit } from "@/cms/layout";
  * belum dipublikasikan), halaman jatuh ke implementasi awal yang identik
  * sehingga URL publik tidak pernah kosong.
  */
-export default async function HomePage() {
+export default function HomePage() {
+  return <Suspense fallback={<div className="min-h-[70vh] bg-navy-900" aria-busy="true" />}><HomeRuntime /></Suspense>;
+}
+
+async function HomeRuntime() {
+  await connection();
   const layout = await ambilLayoutTerbit("beranda");
   if (layout.layout) {
     return <PuckRender layout={layout.layout} trace={{ requestId: "home", route: "/", pageKey: "beranda", source: layout.source, revision: layout.revision }} />;

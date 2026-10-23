@@ -1,4 +1,22 @@
+import type { Metadata } from "next";
+
 import { KerjaKalkulator } from "@/components/kalkulator/KerjaKalkulator";
+
+export const metadata: Metadata = {
+  title: "Kalkulator Pajak Online | EasyTax",
+  description:
+    "Hitung PPh 21, PPh 22, PPh 23, PPh 4(2), PPh 15, PPh Badan, PPN, dan PPnBM dengan kalkulator pajak online EasyTax.",
+  alternates: { canonical: "/kalkulator-pajak" },
+  openGraph: {
+    title: "Kalkulator Pajak Online | EasyTax",
+    description:
+      "Kalkulator pajak online untuk PPh, PPN, dan PPnBM dengan tarif terbaru.",
+    type: "website",
+    locale: "id_ID",
+    siteName: "EasyTax",
+    url: "/kalkulator-pajak",
+  },
+};
 
 /**
  * Halaman /kalkulator-pajak. Tanpa hero — langsung workspace kalkulator.

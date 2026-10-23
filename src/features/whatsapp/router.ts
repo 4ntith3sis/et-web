@@ -3,6 +3,7 @@ import { sql } from "@payloadcms/db-postgres";
 import type { WhatsAppNumberRecord, WhatsAppRoutingConfig, WhatsAppRoutingStrategy, RoutingResult } from "./types";
 import { buatTautanWA, validasiNomorWA, sanitasiPesanWA } from "./utils";
 import { ambilNomorWAAktif, ambilPengaturanWhatsApp } from "./queries";
+import { PESAN_WHATSAPP_KONSULTASI } from "./config";
 
 /**
  * Logika pemilihan nomor murni (pure function) berdasarkan strategi yang dipilih.
@@ -111,6 +112,13 @@ export async function pilihDanTugaskanNomorAtomik(
   config: WhatsAppRoutingConfig,
 ): Promise<WhatsAppNumberRecord | null> {
   const { routingStrategy, manualNumberId } = config;
+  let kandidat: WhatsAppNumberRecord[];
+  try {
+    kandidat = await ambilNomorWAAktif();
+  } catch {
+    throw new Error("Data nomor konsultasi CMS tidak dapat diakses.");
+  }
+  if (!kandidat.length) return null;
 
   // 1. Eksekusi khusus Round Robin secara atomik via PostgreSQL
   if (routingStrategy === "round-robin") {
@@ -179,14 +187,26 @@ export async function pilihDanTugaskanNomorAtomik(
       throw new Error("PostgreSQL Drizzle adapter tidak tersedia untuk Round Robin atomik.");
     } catch (err) {
       console.error("[WhatsApp Router] Transaksi atomik Round Robin gagal.");
-      throw err;
+      // Fallback: tetap pilih nomor aktif dari Payload agar kegagalan transaksi
+      // khusus tidak langsung memutus CTA. Counter update bersifat best-effort.
+      const terpilih = pilihNomorSesuaiStrategi(kandidat, "round-robin");
+      if (!terpilih) throw err;
+      try {
+        await perbaruiStatistikNomorAtomik(terpilih.id);
+      } catch {
+        // Jangan memblokir redirect WhatsApp karena statistik gagal dicatat.
+      }
+      return terpilih;
     }
   }
 
   // 2. Strategi Priority, Weighted, Random atau fallback jika DB transaksi gagal
-  const kandidat = await ambilNomorWAAktif();
   const terpilih = pilihNomorSesuaiStrategi(kandidat, routingStrategy, manualNumberId);
-  if (terpilih) await perbaruiStatistikNomorAtomik(terpilih.id);
+  if (terpilih) {
+    await perbaruiStatistikNomorAtomik(terpilih.id);
+  } else {
+      return null;
+  }
   return terpilih;
 }
 
@@ -200,10 +220,18 @@ export async function pilihDanTugaskanNomorAtomik(
 export async function prosesRoutingKonsultasi(options?: {
   pesanKustom?: string | null;
   sumber?: string | null;
+  konteks?: "layanan" | "paket" | "umum";
 }): Promise<RoutingResult> {
-  const config = await ambilPengaturanWhatsApp();
+  let config: WhatsAppRoutingConfig;
+  let kandidat: WhatsAppNumberRecord[];
+  try {
+    config = await ambilPengaturanWhatsApp();
+    kandidat = await ambilNomorWAAktif();
+  } catch (error) {
+    console.error("[WhatsApp Router] Data routing CMS tidak tersedia.");
+    return { success: false, targetUrl: "", reason: "Data nomor konsultasi sementara tidak tersedia.", fallbackUsed: false };
+  }
 
-  // Bila fitur WhatsApp dinonaktifkan oleh admin
   if (!config.whatsappEnabled) {
     return {
       success: false,
@@ -213,17 +241,24 @@ export async function prosesRoutingKonsultasi(options?: {
     };
   }
 
-  const pesan = sanitasiPesanWA(options?.pesanKustom || config.defaultMessage);
+  const nomorAktif = new Set(kandidat.map((n) => String(n.id)));
+  if (config.fallbackNumber && !kandidat.some((n) => n.phoneNumber === config.fallbackNumber)) {
+    config.fallbackNumber = null;
+  }
+
+  const pesan = sanitasiPesanWA(options?.pesanKustom || config.defaultMessage || PESAN_WHATSAPP_KONSULTASI);
   let terpilih: WhatsAppNumberRecord | null;
   try {
     terpilih = await pilihDanTugaskanNomorAtomik(config);
-  } catch {
-    return {
-      success: false,
-      targetUrl: "/kontak",
-      reason: "Layanan konsultasi sedang mengalami kendala. Silakan hubungi kami melalui formulir kontak.",
-      fallbackUsed: false,
-    };
+    if (!terpilih) return { success: false, targetUrl: "", reason: "Belum ada nomor konsultasi aktif di CMS.", fallbackUsed: false };
+  } catch (error) {
+    // Jika transaksi round-robin gagal, tetap routing ke WhatsApp memakai
+    // daftar aktif CMS; jangan menyembunyikan masalah dengan redirect ke /kontak.
+    if (error instanceof Error && /CMS tidak dapat diakses/.test(error.message)) {
+      return { success: false, targetUrl: "", reason: "Data nomor konsultasi sementara tidak tersedia.", fallbackUsed: false };
+    }
+    terpilih = pilihNomorSesuaiStrategi(kandidat, "round-robin");
+    if (!terpilih) return { success: false, targetUrl: "", reason: "Belum ada nomor konsultasi aktif di CMS.", fallbackUsed: false };
   }
 
   // Jika nomor aktif ditemukan
@@ -244,8 +279,8 @@ export async function prosesRoutingKonsultasi(options?: {
     }
   }
 
-  // Jika tidak ada nomor aktif, gunakan fallbackNumber hanya bila admin secara eksplisit menyediakannya
-  if (config.fallbackNumber && validasiNomorWA(config.fallbackNumber)) {
+  // Nomor fallback hanya boleh menunjuk ke nomor aktif yang tercatat di koleksi CMS.
+  if (config.fallbackNumber && validasiNomorWA(config.fallbackNumber) && nomorAktif.size > 0) {
     try {
       const fallbackUrl = buatTautanWA(config.fallbackNumber, pesan);
       return {
@@ -262,11 +297,10 @@ export async function prosesRoutingKonsultasi(options?: {
     }
   }
 
-  // Jika tidak ada nomor sama sekali yang valid atau admin tidak menetapkan nomor fallback
   return {
     success: false,
-    targetUrl: "/kontak",
-    reason: "Saat ini seluruh konsultan sedang tidak tersedia. Silakan hubungi kami melalui formulir kontak.",
+    targetUrl: "",
+    reason: "Belum ada nomor konsultasi aktif di CMS.",
     fallbackUsed: false,
   };
 }

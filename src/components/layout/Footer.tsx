@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { Email, Instagram, Jam, Lokasi, TikTok, WhatsApp } from "@/components/ikon";
 import { ambilJamOperasional, ambilNavigasi, ambilSitus } from "@/cms/konten";
+import { tautanKonsultasiWhatsApp } from "@/features/whatsapp/config";
 
 /* Tahun ditulis statis: `new Date()` tidak stabil saat prerender. */
 const TAHUN = 2026;
@@ -27,7 +28,7 @@ export async function Footer() {
       Ikon: Instagram,
     },
     { label: "TikTok", href: "https://www.tiktok.com/@easytax.id", Ikon: TikTok },
-    { label: "WhatsApp", href: "/api/konsultasi/whatsapp?sumber=footer-sosmed", Ikon: WhatsApp },
+    { label: "WhatsApp", href: tautanKonsultasiWhatsApp(undefined, "footer-sosmed"), Ikon: WhatsApp },
   ];
 
   return (
@@ -62,8 +63,8 @@ export async function Footer() {
                 <li key={label}>
                   <a
                     href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    target={href.startsWith("/") ? undefined : "_blank"}
+                    rel={href.startsWith("/") ? undefined : "noopener noreferrer"}
                     aria-label={label}
                     className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-white/6 text-teks-terang transition-[var(--transition-base)] hover:-translate-y-0.75 hover:bg-yellow-500 hover:text-navy-900"
                   >
@@ -126,9 +127,8 @@ export async function Footer() {
               <li className="flex items-start gap-3 text-[0.92rem]">
                 <WhatsApp className="mt-0.75 h-4.5 w-4.5 shrink-0 text-yellow-500" />
                 <a
-                  href="/api/konsultasi/whatsapp?sumber=footer-kontak"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={tautanKonsultasiWhatsApp(undefined, "footer-kontak")}
+                  target="_self"
                   className="inline-block py-1 text-teks-terang no-underline transition-colors hover:text-yellow-500"
                 >
                   {situs.kontak.telepon}

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { Centang, Jam, Lokasi, PanahKanan } from "@/components/ikon";
@@ -226,13 +227,13 @@ export function FormPertanyaan({
                 seluruh Indonesia 100% online secara cepat &amp; terproteksi.
               </p>
 
-              <a
+              <Link
                 href="/tentang-kami"
                 className="group/profil mt-4 flex w-fit items-center gap-2 py-1 text-[0.9rem] font-bold text-navy-900 no-underline"
               >
                 Lihat profil kantor kami
                 <PanahKanan className="h-4 w-4 text-navy-900 transition-transform group-hover/profil:translate-x-1" />
-              </a>
+              </Link>
             </div>
           </aside>
         </div>

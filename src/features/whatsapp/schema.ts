@@ -43,6 +43,7 @@ export function validasiStrategiRouting(strategi: string): strategi is WhatsAppR
 export function validasiQueryKonsultasi(params: URLSearchParams): {
   pesanKustom: string;
   sumber: string;
+  konteks: "layanan" | "paket" | "umum";
 } {
   const pesanRaw = params.get("pesan") || "";
   const sumberRaw = params.get("sumber") || "";
@@ -50,5 +51,8 @@ export function validasiQueryKonsultasi(params: URLSearchParams): {
   return {
     pesanKustom: sanitasiPesanWA(pesanRaw, 500),
     sumber: sanitasiPesanWA(sumberRaw, 50),
+    konteks: params.get("konteks") === "layanan" || params.get("konteks") === "paket"
+      ? params.get("konteks") as "layanan" | "paket"
+      : "umum",
   };
 }

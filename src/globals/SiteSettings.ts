@@ -35,9 +35,17 @@ export const SiteSettings: GlobalConfig = {
           fields: [
             {
               name: "whatsappUrl",
-              label: "URL WhatsApp",
+              label: "WhatsApp Resmi EasyTax (Halaman Kontak)",
               type: "text",
-              admin: { description: "Tautan CTA Konsultasi Gratis." },
+              validate: (value: unknown) => {
+                if (value == null || value === "") return true;
+                if (typeof value !== "string" || !/^[0-9+().\s-]{8,24}$/.test(value)) {
+                  return "Masukkan nomor WhatsApp utama dengan kode negara, misalnya +62 812-3456-7890.";
+                }
+                const digits = value.replace(/\D/g, "");
+                return /^[0-9]{8,16}$/.test(digits) || "Nomor harus berisi 8–16 digit termasuk kode negara.";
+              },
+              admin: { description: "Nomor WhatsApp resmi EasyTax yang ditampilkan di halaman Kontak. Atur nomor ini seperti email dan telepon kantor; tidak terkait dengan nomor konsultan WhatsApp Routing. Masukkan kode negara; boleh kosong untuk menyembunyikan aksi WhatsApp." },
             },
             { name: "telepon", label: "Telepon", type: "text" },
             { name: "email", label: "Email", type: "email" },
@@ -147,11 +155,9 @@ export const SiteSettings: GlobalConfig = {
               name: "fallbackWhatsAppNumber",
               label: "Nomor WhatsApp Cadangan (Fallback)",
               type: "text",
-              access: {
-                read: fieldStafPenulis,
-              },
               admin: {
-                description: "Nomor cadangan bila seluruh nomor aktif sedang tidak tersedia (contoh: 6281119200080).",
+                hidden: true,
+                description: "Field legacy. Fallback harus berupa entri aktif pada koleksi Nomor WhatsApp.",
               },
             },
             {

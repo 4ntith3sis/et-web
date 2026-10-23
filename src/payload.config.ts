@@ -28,6 +28,16 @@ if (!payloadSecret || payloadSecret.length < 32) {
   throw new Error("PAYLOAD_SECRET wajib tersedia dan minimal 32 karakter.");
 }
 
+// A host-side build needs the PostgreSQL port published to loopback, while
+// the running Compose app must keep using the internal `postgres` service.
+// DATABASE_URI still takes precedence so runtime behavior is unchanged.
+const databaseUri =
+  process.env.NODE_ENV === "production" && process.env.NEXT_PHASE === "phase-production-build"
+    ? process.env.EASYTAX_BUILD_DATABASE_URI || process.env.DATABASE_URI || process.env.DATABASE_URL || ""
+    : process.env.NODE_ENV === "development"
+      ? process.env.EASYTAX_DEV_DATABASE_URI || process.env.DATABASE_URI || process.env.DATABASE_URL || ""
+      : process.env.DATABASE_URI || process.env.DATABASE_URL || "";
+
 /**
  * Konfigurasi Payload CMS v3 untuk EasyTax.
  *
@@ -79,12 +89,19 @@ export default buildConfig({
   editor: lexicalEditor(),
   secret: payloadSecret,
   serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL || "http://localhost:3004",
+  upload: {
+    // Allow one sentinel byte through Busboy so the application hook can
+    // accept exactly 20 MiB and reject anything larger with its ValidationError.
+    limits: { fileSize: 20 * 1024 * 1024 + 1 },
+    abortOnLimit: true,
+    responseOnLimit: "Ukuran gambar maksimal 20 MB.",
+  },
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URI || process.env.DATABASE_URL || "",
+      connectionString: databaseUri,
     },
     push: false,
   }),

@@ -4,12 +4,7 @@ import { validasiQueryKonsultasi } from "@/features/whatsapp/schema";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const { pesanKustom, sumber } = validasiQueryKonsultasi(url.searchParams);
-
-  const hasil = await prosesRoutingKonsultasi({
-    pesanKustom: pesanKustom || null,
-    sumber: sumber || null,
-  });
+  const { pesanKustom, sumber, konteks } = validasiQueryKonsultasi(url.searchParams);
 
   // Cegah browser atau CDN meng-cache response redirect agar rotasi round-robin/random berjalan di setiap klik
   const headers = new Headers();
@@ -17,21 +12,30 @@ export async function GET(request: Request) {
   headers.set("Pragma", "no-cache");
   headers.set("Expires", "0");
 
-  if (hasil.success) {
-    return NextResponse.redirect(hasil.targetUrl, {
-      status: 307,
-      headers,
+  try {
+    const hasil = await prosesRoutingKonsultasi({
+      pesanKustom: pesanKustom || null,
+      sumber: sumber || null,
+      konteks,
     });
-  }
 
-  // Jika gagal / nonaktif: arahkan ke halaman kontak internal yang aman
-  const fallbackInternal = new URL("/kontak", url.origin);
-  if (hasil.reason) {
-    fallbackInternal.searchParams.set("notif", "whatsapp-offline");
-  }
+    if (hasil.success) {
+      return NextResponse.redirect(hasil.targetUrl, {
+        status: 307,
+        headers,
+      });
+    }
 
-  return NextResponse.redirect(fallbackInternal.toString(), {
-    status: 307,
-    headers,
-  });
+    return NextResponse.json(
+      { error: hasil.reason || "Routing WhatsApp tidak tersedia." },
+      { status: 503, headers },
+    );
+  } catch {
+    // Jangan membocorkan detail internal/log kredensial ke browser dan jangan
+    // mengubah kegagalan routing konsultasi menjadi navigasi ke halaman Kontak.
+    return NextResponse.json(
+      { error: "Routing WhatsApp sementara tidak tersedia." },
+      { status: 503, headers },
+    );
+  }
 }

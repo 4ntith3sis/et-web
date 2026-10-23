@@ -13,8 +13,9 @@ dengan Payload CMS v3 + PostgreSQL; konten dapat dikelola lewat admin
 - Payload CMS `3.91.0` (`@payloadcms/next`, `@payloadcms/db-postgres`, `@payloadcms/richtext-lexical`) + `sharp`
 - Puck `@puckeditor/core` `0.23.0` — Page Builder visual di `/admin/page-builder`
 
-> RAG/pgvector dan pipeline embedding belum ada di repository ini. Fase
-> selanjutnya menambahkannya tanpa mengubah desain.
+> Pencarian semantik RAG/pgvector sudah tersedia tetapi **nonaktif secara
+> default** (`RAG_ARTIKEL_ENABLED=false`). Mengaktifkannya memerlukan migrasi
+> tabel `artikel_embeddings` dan cache model ONNX di `RAG_EMBEDDING_CACHE_DIR`.
 
 ## Setup
 
@@ -45,8 +46,15 @@ npm run cms:migrate        # jalankan migrasi
 npm run cms:migrate:create # buat migrasi dari perubahan skema
 ```
 
-Lint belum dikonfigurasi. Tidak ada test otomatis; verifikasi UI memakai
-script Playwright di `scripts/` (dijalankan dari root, output ke `/tmp`):
+Lint belum dikonfigurasi. Test otomatis memakai Node test runner:
+
+```bash
+npm test                         # 153 lulus, 1 dilewati (per 22 Okt 2026)
+EASYTAX_READ_ONLY_TESTS=1 npm test # lewati suite yang menulis ke database
+```
+
+Verifikasi UI/visual tambahan memakai script Playwright di `scripts/`
+(dijalankan dari root, output ke `/tmp`):
 
 ```bash
 node scripts/audit-responsive.mjs before   # audit overflow/tap-target 9 vp x 8 route
@@ -115,16 +123,18 @@ untuk menyelesaikan import relatif tanpa ekstensi.
 
 Layout tiap halaman publik disimpan sebagai dokumen di collection
 `page-layouts` (draft + terbit, dengan `revision` untuk cegah konflik).
-Tujuh jenis halaman dimigrasikan ke Page Builder: **Beranda**, **Tentang Kami**,
+Tujuh layout halaman tersimpan di CMS: **Beranda**, **Tentang Kami**,
 **Kontak**, **Layanan (listing)**, **Artikel/Tulisan Pajak (listing)**,
 **Template Detail Layanan** (`/layanan/[slug]`), dan
-**Template Detail Artikel** (`/tulisan-pajak/[slug]`).
+**Template Detail Artikel** (`/tulisan-pajak/[slug]`). Saat ini **hanya
+Beranda** yang dirender publik lewat Puck; enam layout lain masih memakai
+komponen native dan baru bisa dilihat lewat route pratinjau.
 
 - **Daftar halaman**: `/admin/page-builder` (server view, di balik role admin/editor).
 - **Editor**: `/admin/page-builder/<pageKey>` — kanvas Puck (drag/drop, tambah/hapus/urut komponen).
-- **Aksi editor**: *Simpan Draft*, *Pratinjau* (`/pratinjau/<pageKey>`), *Lihat Halaman*, *Kembali*, plus tombol *Publish* bawaan Puck.
+- **Aksi editor**: *Pratinjau* (`/pratinjau/<pageKey>`), *Lihat Halaman*, *Kembali*, plus tombol *Publish* bawaan Puck. Tidak ada tombol *Simpan Draft* terpisah; Pratinjau menyimpan draft terlebih dahulu.
 - **Pratinjau**: `/pratinjau/<pageKey>` menampilkan draft terbaru dalam chrome publik, `robots: noindex`, hanya untuk staf terautentikasi.
-- **Publik**: tiap `(website)/**/page.tsx` merender layout terbit via `<PuckRender/>`; bila belum ada layout terbit, memakai tampilan asli sebagai fallback.
+- **Publik**: `/` merender layout terbit via `<PuckRender/>`; bila belum ada layout terbit, memakai tampilan asli sebagai fallback.
 - **Template dinamis**: template detail layanan & artikel tidak menyimpan
   slug item di JSON layout. Slug disuplai per-request lewat `KonteksHalaman`
   (`PuckRender konteks=...`), sehingga satu template melayani semua slug.
@@ -224,10 +234,10 @@ Aplikasi menyediakan konfigurasi Docker multi-stage dan Docker Compose terstanda
 
 ### Berkas Docker
 
-- `Dockerfile`: Multi-stage build (deps → builder → runner) berbasis `node:20-alpine`, non-root user (`nextjs:1001`), serta optimasi layer cache.
-- `compose.yaml`: Orkestrasi service `app` (Next.js & Payload CMS) dan `postgres` (PostgreSQL 16 Alpine).
+- `Dockerfile`: Multi-stage build (deps → builder → runner) berbasis `node:24-bookworm-slim`, non-root user (`nextjs:1001`), serta optimasi layer cache. Node 24 mendukung TypeScript native agar CLI Payload dapat dijalankan di container.
+- `compose.yaml`: Orkestrasi service `app` (Next.js & Payload CMS) dan `postgres` (`pgvector/pgvector:pg16`), dengan volume persisten untuk database, media, dan cache model.
 - `.dockerignore`: Menjamin file sensitif (`.env`), direktori build (`.next`), dan `node_modules` tidak bocor ke dalam build konteks image.
-- `docker/entrypoint.sh`: Skrip inisialisasi kontainer untuk validasi variabel koneksi dan eksekusi migrasi otomatis.
+- `docker/entrypoint.sh`: Memvalidasi `DATABASE_URI`/`PAYLOAD_SECRET`; sengaja **menolak** `RUN_MIGRATIONS=true` agar migrasi dijalankan sebagai langkah operasional terpisah.
 
 ### Menjalankan EasyTax dengan Docker Compose
 
@@ -235,19 +245,23 @@ Aplikasi menyediakan konfigurasi Docker multi-stage dan Docker Compose terstanda
 # 1. Salin template konfigurasi environment
 cp .env.example .env
 
-# 2. Bangun image dan jalankan seluruh container di background
+# 2. Bangun image dan jalankan database + aplikasi di background
 docker compose up --build -d
 
-# 3. Periksa status dan healthcheck container
+# 3. Terapkan migrasi lalu seed pada database baru (dijalankan manual)
+docker compose run --rm app npm run cms:migrate
+docker compose run --rm app npm run cms:seed
+
+# 4. Periksa status dan healthcheck container
 docker compose ps
 
-# 4. Lihat log container aplikasi
+# 5. Lihat log container aplikasi
 docker compose logs -f app
 
-# 5. Lihat log container database PostgreSQL
+# 6. Lihat log container database PostgreSQL
 docker compose logs -f postgres
 
-# 6. Menghentikan container tanpa menghapus data
+# 7. Menghentikan container tanpa menghapus data
 docker compose down
 ```
 
@@ -273,7 +287,7 @@ docker compose exec -T postgres psql -U easytax -d easytax < backup_easytax_2026
 | Server Runner | `next dev -p 3004` (Turbopack) | `next start -p 3004` / Node container |
 | User Process | User lokal | Non-root `nextjs` (UID 1001) |
 | Host Database | `localhost:5432` | `postgres:5432` (Docker Network) |
-| Migrasi Database | Manual (`npm run cms:migrate`) | Otomatis via `RUN_MIGRATIONS=true` atau CI/CD |
+| Migrasi Database | Manual (`npm run cms:migrate`) | Manual/CI/CD sebelum deploy; `RUN_MIGRATIONS=true` ditolak entrypoint |
 | Cache Header Endpoint WA | `no-store, no-cache` | `no-store, no-cache` (identik di semua env) |
 
 ---
@@ -293,7 +307,7 @@ Daftar variabel yang didukung pada `.env`:
 | `POSTGRES_USER` | Username user PostgreSQL container | `easytax` | Docker |
 | `POSTGRES_PASSWORD` | Password user PostgreSQL container | `easytax_dev_password` | Docker |
 | `POSTGRES_PORT` | Port binding host PostgreSQL | `5432` | Docker |
-| `RUN_MIGRATIONS` | Jalankan migrasi skema saat startup container | `false` | Docker |
+| `RUN_MIGRATIONS` | Nilai `true` ditolak entrypoint; migrasi harus dijalankan terpisah | `false` | Docker |
 | `SEED_ADMIN_EMAIL` | Email akun awal saat seed | `admin@easytax.id` | Opsional |
 | `SEED_ADMIN_PASSWORD` | Password akun awal saat seed | `EasyTax#2026` | Opsional |
 
@@ -310,7 +324,7 @@ npm run cms:migrate:create   # Menghasilkan berkas migrasi baru dari perubahan s
 ### Menjalankan Pengujian (Testing)
 ```bash
 npm run typecheck            # Pemeriksaan TypeScript (strict mode)
-npm run test                 # Menjalankan seluruh 74 unit test & integration test
+npm run test                 # 153 lulus, 1 dilewati (per 22 Okt 2026)
 npm run build                # Uji kompilasi build produksi Next.js & Payload
 ```
 

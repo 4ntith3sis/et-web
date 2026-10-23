@@ -8,6 +8,11 @@ if [ -z "$DATABASE_URI" ] && [ -n "$DATABASE_URL" ]; then
   export DATABASE_URI="$DATABASE_URL"
 fi
 
+if [ -z "$DATABASE_URI" ]; then
+  echo "[EasyTax Docker] DATABASE_URI (atau DATABASE_URL) wajib tersedia."
+  exit 1
+fi
+
 if [ -z "$PAYLOAD_SECRET" ] || [ "${#PAYLOAD_SECRET}" -lt 32 ]; then
   echo "[EasyTax Docker] PAYLOAD_SECRET wajib tersedia dan minimal 32 karakter."
   exit 1

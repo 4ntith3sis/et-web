@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 
 import { getClient } from "@/lib/payload";
+import { mediaUrlRelatif } from "@/lib/media-url";
 
 /**
  * Server action pustaka media untuk field gambar Page Builder.
@@ -51,7 +52,7 @@ export async function daftarMedia(cari = ""): Promise<MediaRingkas[]> {
       };
       return {
         id: d.id,
-        url: d.url ?? "",
+        url: mediaUrlRelatif(d.url) ?? "",
         alt: d.alt ?? "",
         nama: d.filename ?? String(d.id),
         width: d.width,

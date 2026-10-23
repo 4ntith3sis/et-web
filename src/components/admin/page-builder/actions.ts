@@ -113,6 +113,7 @@ export async function simpanDraft(
       data: { layout: valid.data, revision } as never,
       draft: true,
       overrideAccess: true,
+      context: { pageBuilderDraft: true },
     });
 
     return {
@@ -138,6 +139,12 @@ export async function terbitkanLayout(
     const { payload, userId } = await penggunaStaf();
     const valid = validasiLayoutPuck(layout);
     if (!valid.ok) return { ok: false, error: valid.error };
+    if (valid.data.content.length === 0) {
+      return {
+        ok: false,
+        error: "Layout kosong tidak dapat diterbitkan. Tambahkan minimal satu komponen.",
+      };
+    }
 
     const halaman = halamanDariKey(pageKey);
     if (!halaman) return { ok: false, error: `Halaman "${pageKey}" tidak dikenal.` };
@@ -166,9 +173,18 @@ export async function terbitkanLayout(
          hanya menghasilkan peringatan dan tidak menginvalidasi apa pun.
        Hook `afterChange` koleksi juga memanggil `revalidateTag` sehingga
        publish dari luar Page Builder (mis. Payload Admin) ikut tercache. */
-    await perbaruiKonten(`layout:${pageKey}`);
-    revalidatePath(halaman.rute, halaman.rute.includes("[") ? "page" : undefined);
-    revalidatePath(`/pratinjau/${pageKey}`);
+    // Penyimpanan sudah commit. Kegagalan invalidasi cache tidak boleh
+    // dilaporkan sebagai publish gagal; cukup dicatat agar operator tahu.
+    try {
+      await perbaruiKonten(`layout:${pageKey}`);
+      revalidatePath(halaman.rute, halaman.rute.includes("[") ? "page" : undefined);
+      revalidatePath(`/pratinjau/${pageKey}`);
+    } catch (error) {
+      console.error("[PageBuilder] Publish tersimpan tetapi invalidasi cache gagal", {
+        pageKey,
+        errorType: error instanceof Error ? error.name : "unknown",
+      });
+    }
 
     return {
       ok: true,

@@ -1,0 +1,76 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: easytax_dev
+      POSTGRES_USER: easytax_dev
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+    volumes:
+      - easytax_dev_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U easytax_dev -d easytax_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    init: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: easytax_dev
+      POSTGRES_USER: easytax_dev
+      POSTGRES_DB: easytax_dev
+      DATABASE_PASSWORD_FILE: /run/secrets/db_password
+      PAYLOAD_SECRET_FILE: /run/secrets/payload_secret
+      PAYLOAD_PUBLIC_SERVER_URL: http://127.0.0.1:${EASYTAX_DEV_PORT:-3041}
+      PORT: 3004
+      RUN_MIGRATIONS: "false"
+      RAG_ARTIKEL_ENABLED: "false"
+    secrets:
+      - db_password
+      - payload_secret
+    ports:
+      - "127.0.0.1:${EASYTAX_DEV_PORT:-3041}:3004"
+    volumes:
+      - easytax_dev_media:/app/media
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3004/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 45s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+secrets:
+  db_password:
+    file: ${EASYTAX_DEV_DB_PASSWORD_FILE:?Set path to a local development DB password file outside the repository}
+  payload_secret:
+    file: ${EASYTAX_DEV_PAYLOAD_SECRET_FILE:?Set path to a local development Payload secret file outside the repository}
+
+volumes:
+  easytax_dev_postgres_data:
+    name: easytax_dev_postgres_data
+  easytax_dev_media:
+    name: easytax_dev_media

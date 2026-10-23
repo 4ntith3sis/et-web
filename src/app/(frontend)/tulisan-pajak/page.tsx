@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { connection } from "next/server";
 
 import { PengantarArtikel } from "@/components/sections/PengantarArtikel";
 import { DaftarArtikel } from "@/components/sections/DaftarArtikel";
@@ -13,6 +14,16 @@ export const metadata: Metadata = {
   title: "Artikel & Edukasi Perpajakan | EasyTax",
   description:
     "Pusat artikel dan edukasi perpajakan EasyTax: panduan praktis SPT, PKP, pembukuan, dan strategi pajak untuk bisnis.",
+  alternates: { canonical: "/tulisan-pajak" },
+  openGraph: {
+    title: "Artikel & Edukasi Perpajakan | EasyTax",
+    description:
+      "Panduan praktis SPT, PKP, pembukuan, dan strategi pajak untuk bisnis.",
+    type: "website",
+    locale: "id_ID",
+    siteName: "EasyTax",
+    url: "/tulisan-pajak",
+  },
 };
 
 type SearchParams = Promise<{ page?: string; kategori?: string; q?: string }>;
@@ -39,6 +50,7 @@ function FallbackArtikel() {
 }
 
 async function IsiTulisanPajak({ searchParams }: { searchParams: SearchParams }) {
+  await connection();
   const params = await searchParams;
 
   const [artikelBeranda, situs] = await Promise.all([

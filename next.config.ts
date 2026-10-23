@@ -30,6 +30,19 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["@puckeditor/core"],
+    globalNotFound: true,
+  },
+  // /artikel adalah duplikat lama dari /tulisan-pajak. Arahkan permanen ke
+  // URL kanonis agar tidak ada dua halaman indeksabel dengan isi identik.
+  async redirects() {
+    return [
+      { source: "/artikel", destination: "/tulisan-pajak", permanent: true },
+      {
+        source: "/artikel/:slug*",
+        destination: "/tulisan-pajak/:slug*",
+        permanent: true,
+      },
+    ];
   },
   // Dimatikan karena bug pada Payload 3.91: saat Partial Prefetching aktif,
   // Next merender ulang route admin yang sudah terautentikasi dalam konteks

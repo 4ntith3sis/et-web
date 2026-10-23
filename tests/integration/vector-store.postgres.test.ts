@@ -17,7 +17,7 @@ let client: Client | undefined;
 function assertIsolatedTarget(rawUrl: string): URL {
   const url = new URL(rawUrl);
   const loopbackHosts = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
-  if (!loopbackHosts.has(url.hostname) || decodeURIComponent(url.pathname.slice(1)) !== expectedDatabase) {
+  if (!loopbackHosts.has(url.hostname.replace(/^\[|\]$/g, "")) || decodeURIComponent(url.pathname.slice(1)) !== expectedDatabase) {
     throw new Error(`Refusing integration test target; require loopback host and database ${expectedDatabase}`);
   }
   if (url.searchParams.has("sslmode") && url.searchParams.get("sslmode") !== "disable") {
@@ -53,7 +53,13 @@ function adapter(connection: Client) {
 describe("PostgreSQL/pgvector vector-store integration (isolated DB only)", { skip: !databaseUrl }, () => {
   let db: ReturnType<typeof adapter>;
   const vectorA = Array.from({ length: 1024 }, (_, index) => index === 0 ? 1 : 0);
-  const vectorB = Array.from({ length: 1024 }, (_, index) => index === 1 ? 1 : 0);
+  // Mirip vectorA (cosine ≈ 0,894) supaya threshold longgar 0,4 benar-benar
+  // mengembalikan dua artikel, sementara threshold ketat 0,9 tetap satu.
+  const vectorB = Array.from({ length: 1024 }, (_, index) => {
+    if (index === 0) return 1;
+    if (index === 1) return 0.5;
+    return 0;
+  });
   const record = (artikelId: number, embedding: number[], suffix = "a", overrides: Partial<ChunkEmbeddingRecord> = {}): ChunkEmbeddingRecord => ({
     artikelId,
     slug: `fixture-${artikelId}`,

@@ -4,12 +4,16 @@ export type HasilValidasiRequestPencarian =
   | { ok: true; query: string }
   | { ok: false; status: 400 | 413; error: string };
 
+const BATAS_BODY_BYTE = 4096;
+
 export function validasiRequestPencarian(
   bodyText: string,
   contentLength: string | null,
 ): HasilValidasiRequestPencarian {
-  const length = Number(contentLength || 0);
-  if (length > 4096) {
+  // Header bisa hilang/dipalsukan; ukur isi yang benar-benar diterima.
+  const lengthHeader = Number(contentLength || 0);
+  const lengthAktual = new TextEncoder().encode(bodyText).byteLength;
+  if (lengthHeader > BATAS_BODY_BYTE || lengthAktual > BATAS_BODY_BYTE) {
     return { ok: false, status: 413, error: "Ukuran request terlalu besar." };
   }
 

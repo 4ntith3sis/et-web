@@ -396,6 +396,14 @@ export interface Testimoni {
    * 1–3 huruf untuk avatar, mis. ES.
    */
   inisial?: string | null;
+  /**
+   * Opsional. Jika kosong, avatar menampilkan inisial.
+   */
+  fotoProfil?: (number | null) | Media;
+  /**
+   * Deskripsi/konteks singkat testimoni (opsional).
+   */
+  deskripsi?: string | null;
   rating?: number | null;
   urutan?: number | null;
   updatedAt: string;
@@ -876,6 +884,8 @@ export interface TestimoniSelect<T extends boolean = true> {
   peran?: T;
   kutipan?: T;
   inisial?: T;
+  fotoProfil?: T;
+  deskripsi?: T;
   rating?: T;
   urutan?: T;
   updatedAt?: T;
@@ -1010,6 +1020,7 @@ export interface PengaturanSitus {
   /**
    * Tautan CTA Konsultasi Gratis.
    */
+  /** Nomor WhatsApp utama halaman Kontak; format internasional, tanpa atau dengan pemisah. */
   whatsappUrl?: string | null;
   telepon?: string | null;
   email?: string | null;

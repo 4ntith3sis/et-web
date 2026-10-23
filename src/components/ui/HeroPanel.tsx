@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { Centang, PanahKanan, Rumah } from "@/components/ikon";
 import { Tombol } from "@/components/ui/Tombol";
+import { tautanKonsultasiWhatsApp } from "@/features/whatsapp/config";
 
 export type RemahHero = { label: string; href?: string };
 
@@ -85,8 +86,8 @@ export function HeroPanel({
 
           <div className="mt-7 flex w-fit flex-wrap items-center gap-4">
             <Tombol
-              href={tombolUtama.href}
-              {...(tombolUtama.eksternal ? { external: true } : {})}
+              href={tombolUtama.href.startsWith("/api/konsultasi/whatsapp") ? tautanKonsultasiWhatsApp(undefined, "hero-panel") : tombolUtama.href}
+              {...(tombolUtama.href.startsWith("/api/konsultasi/whatsapp") ? {} : tombolUtama.eksternal ? { external: true } : {})}
               ukuran="sedang"
               ikonKanan={<PanahKanan className="h-4 w-4" />}
               className="w-fit rounded-md py-[13px] px-7 text-[0.95rem]"

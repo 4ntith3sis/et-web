@@ -18,20 +18,39 @@ import { TemplatAdmin } from "./TemplatAdmin";
 export async function ViewDaftar(props: AdminViewServerProps) {
   stafAtauRedirect(props.user, "/admin/page-builder");
 
-  const res = await props.payload.find({
-    collection: "page-layouts",
-    limit: 100,
-    depth: 0,
-    draft: true,
-    overrideAccess: true,
-  });
+  const [resMain, resDraft] = await Promise.all([
+    props.payload.find({
+      collection: "page-layouts",
+      limit: 100,
+      depth: 0,
+      draft: false,
+      overrideAccess: true,
+    }),
+    props.payload.find({
+      collection: "page-layouts",
+      limit: 100,
+      depth: 0,
+      draft: true,
+      overrideAccess: true,
+    }),
+  ]);
 
   const halaman = HALAMAN_PUCK[KUNCI_PUCK_BERANDA];
   const peta = new Map(
-    res.docs.filter((doc) => (doc as { pageKey?: string }).pageKey === halaman.key).map((doc) => {
-      const d = doc as { pageKey?: string; revision?: number; _status?: string };
-      return [d.pageKey ?? "", d] as const;
-    }),
+    resMain.docs
+      .filter((doc) => (doc as { pageKey?: string }).pageKey === halaman.key)
+      .map((doc) => {
+        const d = doc as { pageKey?: string; revision?: number; _status?: string };
+        return [d.pageKey ?? "", d] as const;
+      }),
+  );
+  const petaDraft = new Map(
+    resDraft.docs
+      .filter((doc) => (doc as { pageKey?: string }).pageKey === halaman.key)
+      .map((doc) => {
+        const d = doc as { pageKey?: string; revision?: number };
+        return [d.pageKey ?? "", d] as const;
+      }),
   );
 
   /* URL Preview konkret per halaman. Halaman statis memakai rutenya sendiri;
@@ -73,7 +92,11 @@ export async function ViewDaftar(props: AdminViewServerProps) {
         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 12 }}>
           {[halaman].map((halaman) => {
                   const dok = peta.get(halaman.key);
-                  const jumlah = dok?.revision ?? 0;
+                  const draft = petaDraft.get(halaman.key);
+                  const revisiPublik = dok?.revision ?? 0;
+                  const revisiDraft = draft?.revision ?? 0;
+                  const jumlah = dok ? revisiPublik : revisiDraft;
+                  const adaDraftBaru = revisiDraft > revisiPublik;
                   const terbit = dok?._status === "published";
                   const pratinjau = urlPratinjau.get(halaman.key) ?? null;
                   return (
@@ -110,7 +133,12 @@ export async function ViewDaftar(props: AdminViewServerProps) {
                         </div>
                         <p style={{ margin: "6px 0 0", color: "#6b7280", fontSize: 13 }}>
                           {halaman.keterangan} · <code>{halaman.rute}</code>
-                          {jumlah > 0 ? ` · revisi ${jumlah}` : ""}
+                          {jumlah > 0
+                            ? terbit
+                              ? ` · revisi publik ${jumlah}`
+                              : ` · draft rev ${jumlah}`
+                            : ""}
+                          {adaDraftBaru && dok ? ` · draft rev ${revisiDraft}` : ""}
                         </p>
                       </div>
 

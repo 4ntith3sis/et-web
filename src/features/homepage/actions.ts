@@ -79,9 +79,10 @@ export async function simpanHomepageDraft(
       } as never,
       draft: true,
       overrideAccess: true,
+      context: { pageBuilderDraft: true },
     })) as { revision?: number; updatedAt?: string };
 
-    await perbaruiKonten("layout:beranda");
+    // Draft tidak mengubah halaman publik; preview membaca DB langsung.
     revalidatePath("/pratinjau/beranda");
 
     return {
@@ -107,6 +108,12 @@ export async function terbitkanHomepage(
   try {
     const validasi = validasiHomepageLayout(layout);
     if (!validasi.ok) return { ok: false, error: validasi.error };
+    if (validasi.data.content.length === 0) {
+      return {
+        ok: false,
+        error: "Layout kosong tidak dapat diterbitkan. Tambahkan minimal satu komponen.",
+      };
+    }
 
     const { payload, userId } = await dapatkanPayloadDanUser();
     const dok = await dapatkanDokumenHomepage(payload);
@@ -125,9 +132,15 @@ export async function terbitkanHomepage(
       overrideAccess: true,
     })) as { revision?: number; updatedAt?: string };
 
-    await perbaruiKonten("layout:beranda");
-    revalidatePath("/");
-    revalidatePath("/pratinjau/beranda");
+    try {
+      await perbaruiKonten("layout:beranda");
+      revalidatePath("/");
+      revalidatePath("/pratinjau/beranda");
+    } catch (error) {
+      console.error("[HomepageEditor] Publish tersimpan tetapi invalidasi cache gagal", {
+        errorType: error instanceof Error ? error.name : "unknown",
+      });
+    }
 
     return {
       ok: true,

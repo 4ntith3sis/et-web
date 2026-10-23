@@ -128,7 +128,7 @@ export function Bintang(props: PropsIkon) {
     >
       <path
         d="M12 3.6l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 17.1l-5.25 2.76 1-5.86L3.5 9.76l5.9-.86L12 3.6z"
-        className="stroke-navy-900 [stroke-width:1.25]"
+        className="stroke-current [stroke-width:0]"
       />
     </svg>
   );

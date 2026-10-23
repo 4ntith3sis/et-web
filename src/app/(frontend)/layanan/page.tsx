@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { connection } from "next/server";
 
 import { CaraKerja } from "@/components/sections/CaraKerja";
 import { DaftarLayanan } from "@/components/sections/DaftarLayanan";
@@ -13,13 +15,28 @@ export const metadata: Metadata = {
   title: "Layanan Perpajakan & Akuntansi | EasyTax",
   description:
     "Layanan perpajakan dan akuntansi EasyTax: pelaporan SPT, pembukuan, pengurusan PKP, restitusi pajak, dan pendampingan audit.",
+  alternates: { canonical: "/layanan" },
+  openGraph: {
+    title: "Layanan Perpajakan & Akuntansi | EasyTax",
+    description:
+      "Pelaporan SPT, pembukuan, pengurusan PKP, restitusi pajak, dan pendampingan audit.",
+    type: "website",
+    locale: "id_ID",
+    siteName: "EasyTax",
+    url: "/layanan",
+  },
 };
 
 /**
  * Halaman /layanan.
  * Dirender langsung menggunakan komponen native dan data CMS.
  */
-export default async function LayananPage() {
+export default function LayananPage() {
+  return <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}><LayananRuntime /></Suspense>;
+}
+
+async function LayananRuntime() {
+  await connection();
   const layanan = await ambilLayanan();
 
   return (

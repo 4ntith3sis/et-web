@@ -78,7 +78,7 @@ export function CeritaKami() {
         <div className="relative">
           <div className="relative h-[380px] overflow-hidden rounded-[28px] bg-netral-lat shadow-lg">
             <Image
-              src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1000&q=80"
+              src="/images/external/photo-1551836022-d5d88e9218df.webp"
               alt="Tim konsultan pajak EasyTax berdiskusi"
               fill
               sizes="(max-width: 1024px) 100vw, 45vw"

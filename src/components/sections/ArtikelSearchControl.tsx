@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { Cari } from "@/components/ikon";
 
@@ -11,6 +12,7 @@ type HasilSemantik = {
   url: string;
   relevansi: number;
   kategori?: string;
+  gambar?: string;
 };
 
 const MAX_QUERY = 500;
@@ -31,6 +33,44 @@ async function cariSemantik(query: string, signal: AbortSignal): Promise<HasilSe
   return Array.isArray(data.artikel) ? data.artikel : [];
 }
 
+async function cariKeyword(query: string, signal: AbortSignal): Promise<HasilSemantik[]> {
+  const params = new URLSearchParams({ limit: "5", depth: "1", draft: "false", sort: "-tanggalTerbit" });
+  params.set("where[or][0][judul][like]", query);
+  params.set("where[or][1][ringkasan][like]", query);
+  const response = await fetch(`/api/artikel?${params.toString()}`, { signal });
+  if (!response.ok) throw new Error("Pencarian artikel belum tersedia. Silakan coba lagi.");
+  const data = await response.json() as {
+      docs?: Array<{ id: number; judul: string; slug: string; ringkasan?: string; sampul?: { url?: string | null } | number | null; kategori?: { nama?: string } | number | null }>;
+  };
+  return (data.docs ?? []).slice(0, 5).map((item) => ({
+    id: item.id,
+    judul: item.judul,
+    slug: item.slug,
+    ringkasan: item.ringkasan ?? "",
+    gambar: typeof item.sampul === "object" && item.sampul?.url ? item.sampul.url : undefined,
+    kategori: typeof item.kategori === "object" ? item.kategori?.nama : undefined,
+    url: `/tulisan-pajak/${encodeURIComponent(item.slug)}`,
+    relevansi: 0,
+  }));
+}
+
+async function cariDenganFallback(
+  query: string,
+  signal: AbortSignal,
+  onMode: (mode: "semantic" | "keyword") => void,
+): Promise<HasilSemantik[]> {
+  try {
+    const results = await cariSemantik(query, signal);
+    onMode("semantic");
+    return results;
+  } catch {
+    if (signal.aborted) throw new DOMException("Pencarian dibatalkan", "AbortError");
+    const results = await cariKeyword(query, signal);
+    onMode("keyword");
+    return results;
+  }
+}
+
 export function ArtikelSearchControl({
   initialQuery,
   kategoriAktif,
@@ -39,6 +79,7 @@ export function ArtikelSearchControl({
   onError,
   onCategoryNote,
   onSearchSubmitted,
+  onSearchMode,
 }: {
   initialQuery: string;
   kategoriAktif?: string;
@@ -47,13 +88,16 @@ export function ArtikelSearchControl({
   onError: (error: string | null) => void;
   onCategoryNote: (visible: boolean) => void;
   onSearchSubmitted: (submitted: boolean) => void;
+  onSearchMode: (mode: "semantic" | "keyword") => void;
 }) {
+  const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
   const [suggestions, setSuggestions] = useState<HasilSemantik[]>([]);
   const [liveLoading, setLiveLoading] = useState(false);
   const [liveError, setLiveError] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [refreshKey, setRefreshKey] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
   const liveControllerRef = useRef<AbortController | null>(null);
   const explicitControllerRef = useRef<AbortController | null>(null);
@@ -80,7 +124,7 @@ export function ArtikelSearchControl({
     const timer = window.setTimeout(async () => {
       setLiveError(null);
       try {
-        const results = await cariSemantik(trimmed, controller.signal);
+        const results = await cariDenganFallback(trimmed, controller.signal, onSearchMode);
         if (generation !== generationRef.current) return;
         setSuggestions(results.slice(0, 5));
         setDropdownOpen(true);
@@ -98,13 +142,14 @@ export function ArtikelSearchControl({
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [query]);
+  }, [query, refreshKey]);
 
   useEffect(() => {
     setQuery(initialQuery);
     onResults([]);
     onError(null);
     onSearchSubmitted(false);
+    onSearchMode("semantic");
   }, [initialQuery]);
 
   useEffect(() => () => {
@@ -121,7 +166,9 @@ export function ArtikelSearchControl({
   }, []);
 
   function openResult(item: HasilSemantik) {
-    window.location.assign(item.url);
+    /* Hasil pencarian selalu berupa path internal. Pakai router agar
+       transisi tetap client-side dan tidak memuat ulang seluruh halaman. */
+    router.push(item.url);
   }
 
   async function runExplicitSearch() {
@@ -139,7 +186,7 @@ export function ArtikelSearchControl({
     onSearchSubmitted(true);
     onCategoryNote(Boolean(kategoriAktif));
     try {
-      onResults(await cariSemantik(normalized, controller.signal));
+      onResults(await cariDenganFallback(normalized, controller.signal, onSearchMode));
     } catch (error) {
       if (!controller.signal.aborted) onError(error instanceof Error ? error.message : "Pencarian gagal. Silakan coba lagi.");
     } finally {
@@ -189,7 +236,7 @@ export function ArtikelSearchControl({
       <div ref={searchRef} className="relative z-30 min-w-0 flex-1">
         <Cari aria-hidden="true" className="pointer-events-none absolute top-1/2 left-[18px] h-4 w-4 -translate-y-1/2 text-teks-redup" />
         <input
-          type="search"
+          type="text"
           value={query}
           onChange={(event) => {
             const value = event.target.value.slice(0, MAX_QUERY);
@@ -200,7 +247,16 @@ export function ArtikelSearchControl({
             onError(null);
             onSearchSubmitted(false);
           }}
-          onFocus={() => { if (query.trim()) { setDropdownOpen(true); setLiveLoading(true); } }}
+          onFocus={() => {
+            if (!query.trim()) return;
+            setDropdownOpen(true);
+            // Fokus ulang dengan kata kunci yang sama tidak mengubah `query`,
+            // jadi efek live-search tidak berjalan. Minta efek baru hanya
+            // bila belum ada hasil/error, agar spinner tidak menggantung.
+            if (!suggestions.length || liveError) {
+              setRefreshKey((key) => key + 1);
+            }
+          }}
           onKeyDown={onKeyDown}
           placeholder="Cari artikel perpajakan, akuntansi, atau keuangan bisnis..."
           maxLength={MAX_QUERY}
@@ -210,7 +266,7 @@ export function ArtikelSearchControl({
           aria-controls={listboxId}
           aria-describedby="artikel-search-help"
           aria-activedescendant={activeIndex >= 0 ? `artikel-search-option-${activeIndex}` : undefined}
-          className="h-[52px] w-full rounded-full border-[1.5px] border-garis bg-white pr-12 pl-11 text-[0.95rem] text-navy-900 outline-none transition-colors duration-150 placeholder:text-teks-redup focus:border-garis focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy-900/40"
+          className="artikel-search-input h-[52px] w-full rounded-full border-[1.5px] border-garis bg-white pr-12 pl-11 text-[0.95rem] text-navy-900 outline-none transition-colors duration-150 placeholder:text-teks-redup focus:border-garis focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy-900/40"
         />
         {query && <button type="button" onClick={clear} aria-label="Hapus pencarian" className="absolute top-1/2 right-4 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-lg leading-none text-teks-redup transition-colors hover:text-navy-900 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-navy-900/50">×</button>}
         <span id="artikel-search-help" className="sr-only">Ketik untuk rekomendasi; gunakan panah atas/bawah lalu Enter untuk membuka hasil, atau Enter tanpa pilihan untuk mencari.</span>

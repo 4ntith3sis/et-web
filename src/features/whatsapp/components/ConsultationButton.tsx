@@ -1,9 +1,11 @@
 import React from "react";
 import { Tombol } from "@/components/ui/Tombol";
+import { PESAN_WHATSAPP_KONSULTASI, tautanKonsultasiWhatsApp } from "@/features/whatsapp/config";
 
 export interface ConsultationButtonProps {
   /** Pesan pembuka WhatsApp khusus saat tombol diklik. */
   pesan?: string;
+  konteks?: "layanan" | "paket" | "umum";
   /** Pelacakan sumber tombol (mis. 'navbar', 'hero', 'cta-bawah'). */
   sumber?: string;
   /** Label teks tombol bila children tidak disertakan. */
@@ -19,11 +21,11 @@ export interface ConsultationButtonProps {
 
 /**
  * Komponen tombol konsultasi terpusat:
- * Mengarahkan pengunjung ke endpoint routing server (/api/konsultasi/whatsapp)
- * dengan variasi tampilan dan gaya yang konsisten dengan desain EasyTax.
+ * Mengarahkan pengunjung ke WhatsApp dengan variasi tampilan yang konsisten.
  */
 export function ConsultationButton({
   pesan,
+  konteks = "umum",
   sumber,
   label,
   children,
@@ -51,17 +53,13 @@ export function ConsultationButton({
     );
   }
 
-  const queryParams = new URLSearchParams();
-  if (pesan) queryParams.set("pesan", pesan);
-  if (sumber) queryParams.set("sumber", sumber);
-
-  const qs = queryParams.toString();
-  const href = qs ? `/api/konsultasi/whatsapp?${qs}` : "/api/konsultasi/whatsapp";
+  const pesanFinal = pesan || (sumber ? PESAN_WHATSAPP_KONSULTASI : undefined);
+  const href = tautanKonsultasiWhatsApp(pesanFinal, sumber, konteks);
 
   return (
     <Tombol
       href={href}
-      external
+      navigasiPenuh
       varian={varian}
       ukuran={ukuran}
       className={className}

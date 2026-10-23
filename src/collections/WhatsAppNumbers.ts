@@ -31,13 +31,13 @@ export function validasiNomorWA(nomor?: string | null): boolean {
 export const WhatsAppNumbers: CollectionConfig = {
   slug: "nomor-whatsapp",
   labels: {
-    singular: "Nomor WhatsApp",
-    plural: "Nomor WhatsApp",
+    singular: "WhatsApp Routing",
+    plural: "WhatsApp Routing",
   },
   admin: {
     useAsTitle: "label",
     defaultColumns: ["label", "phoneNumber", "enabled", "priority", "weight", "assignedCount"],
-    group: "Kontak",
+    group: "WhatsApp",
   },
   access: {
     // Pengunjung publik tidak perlu mengakses daftar lengkap nomor WhatsApp melalui REST API

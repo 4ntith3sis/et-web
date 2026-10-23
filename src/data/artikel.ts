@@ -8,6 +8,8 @@ export interface ArtikelBeranda {
   judul: string;
   ringkasan: string;
   kategori: string;
+  /** Slug kategori dari CMS; data statis memakai nama huruf kecil. */
+  kategoriSlug?: string;
   tanggal: string;
   waktuBaca: string;
   gambar: string;
@@ -24,7 +26,7 @@ export const artikelBeranda: ArtikelBeranda[] = [
     tanggal: "7 Okt 2026",
     waktuBaca: "3 Min Baca",
     gambar:
-      "https://images.unsplash.com/photo-1591696331111-ef9586a5b17a?auto=format&fit=crop&w=600&q=80",
+      "/images/external/photo-1591696331111-ef9586a5b17a.webp",
   },
   {
     slug: "batas-omzet-umkm-pajak-final",
@@ -36,7 +38,7 @@ export const artikelBeranda: ArtikelBeranda[] = [
     tanggal: "7 Okt 2026",
     waktuBaca: "3 Min Baca",
     gambar:
-      "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=600&q=80",
+      "/images/external/photo-1521791136064-7986c2920216.webp",
   },
   {
     slug: "kredit-faktur-pajak-masukan",
@@ -48,7 +50,7 @@ export const artikelBeranda: ArtikelBeranda[] = [
     tanggal: "7 Okt 2026",
     waktuBaca: "3 Min Baca",
     gambar:
-      "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?auto=format&fit=crop&w=600&q=80",
+      "/images/external/photo-1579532537598-459ecdaf39cc.webp",
   },
   {
     slug: "neraca-laba-rugi-spt-badan",
@@ -60,7 +62,7 @@ export const artikelBeranda: ArtikelBeranda[] = [
     tanggal: "7 Okt 2026",
     waktuBaca: "3 Min Baca",
     gambar:
-      "https://images.unsplash.com/photo-1560472355-536de3962603?auto=format&fit=crop&w=600&q=80",
+      "/images/external/photo-1560472355-536de3962603.webp",
   },
   {
     slug: "penerapan-ter-pph-21",
@@ -72,7 +74,7 @@ export const artikelBeranda: ArtikelBeranda[] = [
     tanggal: "7 Okt 2026",
     waktuBaca: "3 Min Baca",
     gambar:
-      "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=600&q=80",
+      "/images/external/photo-1611974789855-9c2a0a7236a3.webp",
   },
   {
     slug: "syarat-pengukuhan-pkp-terbaru",
@@ -84,7 +86,7 @@ export const artikelBeranda: ArtikelBeranda[] = [
     tanggal: "7 Okt 2026",
     waktuBaca: "3 Min Baca",
     gambar:
-      "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&w=600&q=80",
+      "/images/external/photo-1504868584819-f8e8b4b6d7e3.webp",
   },
   {
     slug: "tata-cara-pembukuan-umkm",
@@ -95,7 +97,7 @@ export const artikelBeranda: ArtikelBeranda[] = [
     tanggal: "6 Okt 2026",
     waktuBaca: "4 Min Baca",
     gambar:
-      "https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&fit=crop&w=600&q=80",
+      "/images/external/photo-1554224154-26032ffc0d07.webp",
   },
   {
     slug: "pendapatan-tunjangan-pajak",
@@ -106,7 +108,7 @@ export const artikelBeranda: ArtikelBeranda[] = [
     tanggal: "6 Okt 2026",
     waktuBaca: "4 Min Baca",
     gambar:
-      "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=600&q=80",
+      "/images/external/photo-1521791136064-7986c2920216.webp",
   },
   {
     slug: "e-faktur-4-0",
@@ -117,7 +119,7 @@ export const artikelBeranda: ArtikelBeranda[] = [
     tanggal: "5 Okt 2026",
     waktuBaca: "5 Min Baca",
     gambar:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80",
+      "/images/external/photo-1460925895917-afdab827c52f.webp",
   },
   {
     slug: "struktur-modal-dan-beban",
@@ -128,7 +130,7 @@ export const artikelBeranda: ArtikelBeranda[] = [
     tanggal: "5 Okt 2026",
     waktuBaca: "4 Min Baca",
     gambar:
-      "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80",
+      "/images/external/photo-1554224155-8d04cb21cd6c.webp",
   },
   {
     slug: "transfer-pricing-dokumentasi",
@@ -139,7 +141,7 @@ export const artikelBeranda: ArtikelBeranda[] = [
     tanggal: "4 Okt 2026",
     waktuBaca: "5 Min Baca",
     gambar:
-      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=600&q=80",
+      "/images/external/photo-1450101499163-c8848c66ca85.webp",
   },
   {
     slug: "menjawab-sp2dk",
@@ -150,6 +152,6 @@ export const artikelBeranda: ArtikelBeranda[] = [
     tanggal: "4 Okt 2026",
     waktuBaca: "4 Min Baca",
     gambar:
-      "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80",
+      "/images/external/photo-1589829545856-d10d557cf95f.webp",
   },
 ];

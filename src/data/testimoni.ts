@@ -10,6 +10,8 @@ export interface Testimoni {
   kutipan: string;
   inisial: string;
   rating: number;
+  fotoProfil?: string;
+  deskripsi?: string;
 }
 
 export const testimoni: Testimoni[] = [

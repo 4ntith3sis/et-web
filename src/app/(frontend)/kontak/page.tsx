@@ -1,10 +1,28 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
+import { connection } from "next/server";
 
 import { FaqKontak } from "@/components/sections/FaqKontak";
 import { FormPertanyaan } from "@/components/sections/FormPertanyaan";
 import { KontakHero } from "@/components/sections/KontakHero";
 import { LokasiKantor } from "@/components/sections/LokasiKantor";
-import { ambilJamOperasional, ambilTopikKonsultasi } from "@/cms/konten";
+import { ambilJamOperasional, ambilPengaturan, ambilTopikKonsultasi } from "@/cms/konten";
+
+export const metadata: Metadata = {
+  title: "Kontak & Konsultasi Pajak | EasyTax",
+  description:
+    "Hubungi konsultan pajak EasyTax untuk konsultasi SPT, pembukuan, PKP, restitusi, dan kebutuhan perpajakan bisnis Anda.",
+  alternates: { canonical: "/kontak" },
+  openGraph: {
+    title: "Kontak & Konsultasi Pajak | EasyTax",
+    description:
+      "Hubungi konsultan pajak EasyTax untuk konsultasi perpajakan dan keuangan bisnis Anda.",
+    type: "website",
+    locale: "id_ID",
+    siteName: "EasyTax",
+    url: "/kontak",
+  },
+};
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -37,19 +55,29 @@ async function NotifikasiOffline({
  * Halaman /kontak.
  * Dirender langsung menggunakan komponen native dan data CMS.
  */
-export default async function KontakPage({
+export default function KontakPage({
   searchParams,
 }: {
   searchParams?: SearchParams;
 }) {
-  const [topikKonsultasi, jamOperasional] = await Promise.all([
+  return (
+    <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>
+      <KontakRuntime searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function KontakRuntime({ searchParams }: { searchParams?: SearchParams }) {
+  await connection();
+  const [topikKonsultasi, jamOperasional, pengaturan] = await Promise.all([
     ambilTopikKonsultasi(),
     ambilJamOperasional(),
+    ambilPengaturan(),
   ]);
 
   return (
     <>
-      <KontakHero />
+          <KontakHero nomorWhatsAppUtama={pengaturan?.whatsappUrl} teleponKantor={pengaturan?.telepon} />
       <Suspense fallback={null}>
         <NotifikasiOffline searchParams={searchParams} />
       </Suspense>
